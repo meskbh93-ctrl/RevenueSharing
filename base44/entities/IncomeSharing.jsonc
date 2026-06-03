@@ -1,0 +1,32 @@
+{
+  "name": "IncomeSharing",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "description": "Associated project ID"
+    },
+    "uniform_rate": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to apply uniform rate across all years"
+    },
+    "government_shares": {
+      "type": "array",
+      "description": "Government share percentages for each year",
+      "items": {
+        "type": "number"
+      }
+    },
+    "partner_shares": {
+      "type": "array",
+      "description": "Partner share percentages for each year",
+      "items": {
+        "type": "number"
+      }
+    }
+  },
+  "required": [
+    "project_id"
+  ]
+}

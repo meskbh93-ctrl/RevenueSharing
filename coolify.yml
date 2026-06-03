@@ -1,0 +1,79 @@
+# Coolify Application Configuration
+# هذا الملف يساعد Coolify على فهم متطلبات التطبيق تلقائياً
+
+version: 1
+
+application:
+  name: Share Flow Pro
+  description: ShareFlow Pro - Income Sharing Platform with Base44 Backend
+  
+  # Docker configuration
+  docker:
+    dockerfile: ./Dockerfile
+    # استخدم Dockerfile.nginx للـ production
+    # dockerfile: ./Dockerfile.nginx
+    
+  # Port configuration
+  ports:
+    - internal: 3000
+      external: 3000
+  
+  # Build configuration
+  build:
+    command: npm run build
+    output_directory: ./dist
+    cache: true
+  
+  # Development configuration
+  development:
+    command: npm run dev
+    port: 5173
+  
+  # Health check configuration
+  healthcheck:
+    path: /
+    interval: 30
+    timeout: 10
+    retries: 3
+    start_period: 5
+  
+  # Environment variables
+  environment:
+    VITE_BASE44_APP_ID: ""  # Set in Coolify dashboard
+    VITE_BASE44_APP_BASE_URL: ""  # Set in Coolify dashboard
+    # BASE44_LEGACY_SDK_IMPORTS: "false"
+  
+  # Pre-deployment hooks
+  pre_deployment:
+    - npm ci
+  
+  # Post-deployment hooks
+  post_deployment: []
+  
+  # Database configuration (if needed)
+  # databases: []
+  
+  # Services (e.g., Redis, PostgreSQL)
+  # services: []
+
+# Resources
+resources:
+  memory: 512  # MB
+  cpu: 0.5
+
+# Auto-deployment configuration
+deployment:
+  auto_deploy: true
+  branch: main
+  
+# Environment-specific configurations
+environments:
+  production:
+    resources:
+      memory: 1024
+      cpu: 1
+  
+  staging:
+    resources:
+      memory: 512
+      cpu: 0.5

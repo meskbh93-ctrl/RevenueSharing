@@ -1,0 +1,39 @@
+{
+  "name": "Cost",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "description": "Associated project ID"
+    },
+    "name": {
+      "type": "string",
+      "description": "Cost item name"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "operational",
+        "capital"
+      ],
+      "description": "Cost type"
+    },
+    "base_amount": {
+      "type": "number",
+      "description": "Base annual amount"
+    },
+    "growth_rates": {
+      "type": "array",
+      "description": "Annual growth rates for 5 years (percentages)",
+      "items": {
+        "type": "number"
+      }
+    }
+  },
+  "required": [
+    "project_id",
+    "name",
+    "type",
+    "base_amount"
+  ]
+}
