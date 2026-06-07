@@ -1,4 +1,9 @@
-
 export default function ResetPassword() {
-  return <div>Reset Password Page</div>;
+  return (
+    <div className="p-10">
+      <h1 className="text-2xl font-bold">
+        Reset Password
+      </h1>
+    </div>
+  );
 }
