@@ -1,4 +1,8 @@
-
 export default function Chatbot() {
-  return <div>Chatbot Page</div>;
-}
+  return (
+    <div>
+      <h1 className="text-3xl font-bold">
+        Chatbot
+      </h1>
+    </div>
+  );
