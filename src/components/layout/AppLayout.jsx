@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import Sidebar from './Sidebar';
+import Sidebar from './Sidebar.jsx';
 import { useI18n } from '@/lib/i18n.jsx';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils.js';
 import { MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -14,18 +14,24 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-background" dir={isRTL ? 'rtl' : 'ltr'}>
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-      <main className={cn(
-        "transition-all duration-300 min-h-screen",
-        isRTL
-          ? (collapsed ? "mr-16" : "mr-64")
-          : (collapsed ? "ml-16" : "ml-64")
-      )}>
+
+      <main
+        className={cn(
+          'transition-all duration-300 min-h-screen',
+          isRTL
+            ? collapsed
+              ? 'mr-16'
+              : 'mr-64'
+            : collapsed
+            ? 'ml-16'
+            : 'ml-64'
+        )}
+      >
         <div className="p-4 md:p-8">
           <Outlet />
         </div>
       </main>
 
-      {/* Floating Chatbot Button */}
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
