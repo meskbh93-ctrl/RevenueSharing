@@ -1,3 +1,27 @@
-const theme = {}
+import { createContext, useContext } from 'react';
 
-export default theme
+const ThemeContext = createContext({
+  theme: 'light',
+  setTheme: () => {}
+});
+
+export const ThemeProvider = ({ children }) => {
+  return (
+    <ThemeContext.Provider
+      value={{
+        theme: 'light',
+        setTheme: () => {}
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => {
+  return useContext(ThemeContext);
+};
+
+const theme = {};
+
+export default theme;
