@@ -1,4 +1,9 @@
-
 export default function ForgotPassword() {
-  return <div>Forgot Password Page</div>;
+  return (
+    <div className="p-10">
+      <h1 className="text-2xl font-bold">
+        Forgot Password
+      </h1>
+    </div>
+  );
 }
