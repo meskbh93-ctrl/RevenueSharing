@@ -1,28 +1,31 @@
-import { Toaster } from "@/components/ui/toaster"
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClientInstance } from '@/lib/query-client'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import { I18nProvider } from '@/lib/i18n.jsx';
-import { ThemeProvider } from '@/lib/theme.jsx';
-import { ProjectProvider } from '@/lib/projectContext.jsx';
+import { Toaster } from "@/components/ui/toaster.jsx";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClientInstance } from "@/lib/query-client.js";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 
-import { Navigate } from 'react-router-dom';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
-import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
-import AppLayout from '@/components/layout/AppLayout';
-import Home from '@/pages/Home';
-import Introduction from '@/pages/Introduction';
-import Services from '@/pages/Services';
-import Costs from '@/pages/Costs';
-import IncomeSharing from '@/pages/IncomeSharing';
-import Dashboard from '@/pages/Dashboard';
-import Chatbot from '@/pages/Chatbot';
+import PageNotFound from "./lib/PageNotFound.jsx";
+
+import { AuthProvider, useAuth } from "@/lib/AuthContext.jsx";
+import UserNotRegisteredError from "@/components/UserNotRegisteredError.jsx";
+
+import { I18nProvider } from "@/lib/i18n.jsx";
+import { ThemeProvider } from "@/lib/theme.jsx";
+import { ProjectProvider } from "@/lib/projectContext.jsx";
+
+import ProtectedRoute from "@/components/ProtectedRoute.jsx";
+import AppLayout from "@/components/layout/AppLayout.jsx";
+
+import Login from "@/pages/Login.jsx";
+import Register from "@/pages/Register.jsx";
+import ForgotPassword from "@/pages/ForgotPassword.jsx";
+import ResetPassword from "@/pages/ResetPassword.jsx";
+import Home from "@/pages/Home.jsx";
+import Introduction from "@/pages/Introduction.jsx";
+import Services from "@/pages/Services.jsx";
+import Costs from "@/pages/Costs.jsx";
+import IncomeSharing from "@/pages/IncomeSharing.jsx";
+import Dashboard from "@/pages/Dashboard.jsx";
+import Chatbot from "@/pages/Chatbot.jsx";
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings } = useAuth();
@@ -42,7 +45,14 @@ const AuthenticatedApp = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login" replace />} />}>
+
+        <Route
+          element={
+            <ProtectedRoute
+              unauthenticatedElement={<Navigate to="/login" replace />}
+            />
+          }
+        >
           <Route element={<AppLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/introduction" element={<Introduction />} />
@@ -53,6 +63,7 @@ const AuthenticatedApp = () => {
             <Route path="/chatbot" element={<Chatbot />} />
           </Route>
         </Route>
+
         <Route path="*" element={<PageNotFound />} />
       </Routes>
     </ProjectProvider>
@@ -73,7 +84,7 @@ function App() {
         </I18nProvider>
       </QueryClientProvider>
     </AuthProvider>
-  )
+  );
 }
 
-export default App
+export default App;
