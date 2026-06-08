@@ -1,76 +1,228 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
 
-import { Button } from "@/components/ui/button.jsx";
-import { Input } from "@/components/ui/input.jsx";
-import { Label } from "@/components/ui/label.jsx";
+import { Link } from 'react-router-dom';
 
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
+import { base44 } from '@/api/base44Client';
 
-import AuthLayout from "@/components/AuthLayout.jsx";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
+import {
+  UserPlus,
+  Mail,
+  Lock,
+  Loader2,
+} from 'lucide-react';
+
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from '@/components/ui/input-otp';
+
+import AuthLayout from '@/components/AuthLayout';
+import GoogleIcon from '@/components/GoogleIcon';
+
+import { toast } from '@/components/ui/use-toast';
 
 export default function Register() {
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] =
+    useState('');
+
+  const [password, setPassword] =
+    useState('');
+
+  const [
+    confirmPassword,
+    setConfirmPassword,
+  ] = useState('');
+
+  const [error, setError] =
+    useState('');
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [showOtp, setShowOtp] =
+    useState(false);
+
+  const [otpCode, setOtpCode] =
+    useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setError('');
+
+    if (
+      password !== confirmPassword
+    ) {
+      setError(
+        'Passwords do not match'
+      );
+
+      return;
+    }
+
     setLoading(true);
 
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 1000);
+    try {
+      await base44.auth.register({
+        email,
+        password,
+      });
+
+      setShowOtp(true);
+    } catch (err) {
+      setError(
+        err.message ||
+          'Registration failed'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleVerify = async () => {
+    setError('');
+
+    setLoading(true);
+
+    try {
+      const result =
+        await base44.auth.verifyOtp({
+          email,
+          otpCode,
+        });
+
+      if (result?.access_token) {
+        base44.auth.setToken(
+          result.access_token
+        );
+      }
+
+      window.location.href = '/';
+    } catch (err) {
+      setError(
+        err.message ||
+          'Invalid verification code'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setError('');
+
+    try {
+      await base44.auth.resendOtp(
+        email
+      );
+
+      toast({
+        title: 'Code sent',
+        description:
+          'Check your email for the new code.',
+      });
+    } catch (err) {
+      setError(
+        err.message ||
+          'Failed to resend code'
+      );
+    }
+  };
+
+  const handleGoogle = () => {
+    base44.auth.loginWithProvider(
+      'google',
+      '/'
+    );
+  };
+
+  if (showOtp) {
+    return (
+      <AuthLayout
+        icon={Mail}
+        title="Verify your email"
+        subtitle={`We sent a code to ${email}`}
+      >
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="flex justify-center mb-6">
+          <InputOTP
+            maxLength={6}
+            value={otpCode}
+            onChange={setOtpCode}
+            autoFocus
+            autoComplete="one-time-code"
+          >
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+        </div>
+
+        <Button
+          className="w-full h-12 font-medium"
+          onClick={handleVerify}
+          disabled={
+            loading ||
+            otpCode.length < 6
+          }
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Verifying...
+            </>
+          ) : (
+            'Verify'
+          )}
+        </Button>
+
+        <p className="text-center text-sm text-muted-foreground mt-4">
+          Didn&apos;t receive the code?{' '}
+          <button
+            onClick={handleResend}
+            className="text-primary font-medium hover:underline"
+          >
+            Resend
+          </button>
+        </p>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout
       icon={UserPlus}
-      title="Create account"
-      subtitle="Register a new account"
+      title="Create your account"
+      subtitle="Sign up to get started"
       footer={
         <>
-          Already have an account?{" "}
+          Already have an account?{' '}
           <Link
             to="/login"
             className="text-primary font-medium hover:underline"
           >
-            Login
+            Log in
           </Link>
         </>
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label>Email</Label>
-
-          <Input
-            type="email"
-            placeholder="you@example.com"
-            required
-          />
-        </div>
-
-        <div>
-          <Label>Password</Label>
-
-          <Input
-            type="password"
-            placeholder="••••••••"
-            required
-          />
-        </div>
-
-        <Button className="w-full" disabled={loading}>
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Creating...
-            </>
-          ) : (
-            "Create Account"
-          )}
-        </Button>
-      </form>
-    </AuthLayout>
-  );
-}
+      <Button
+        variant="outline"
+        className="w-full h-12 text-sm font-medium mb-6"
+        onClick={handleGoogle}
+      >
