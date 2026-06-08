@@ -24,7 +24,6 @@ import {
 } from 'lucide-react';
 
 import { motion } from 'framer-motion';
-
 import { useNavigate } from 'react-router-dom';
 
 export default function Introduction() {
@@ -58,8 +57,14 @@ export default function Introduction() {
 
     queryFn: async () => {
       try {
+        if (
+          !base44?.entities?.Project
+        ) {
+          return null;
+        }
+
         const list =
-          await base44.entities.Projects.list();
+          await base44.entities.Project.list();
 
         return list.find(
           (p) =>
@@ -94,7 +99,17 @@ export default function Introduction() {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      return await base44.entities.Projects.create(
+      if (
+        !base44?.entities?.Project
+          ?.create
+      ) {
+        return {
+          id: Date.now(),
+          ...data,
+        };
+      }
+
+      return await base44.entities.Project.create(
         data
       );
     },
@@ -117,7 +132,17 @@ export default function Introduction() {
       id,
       data,
     }) => {
-      return await base44.entities.Projects.update(
+      if (
+        !base44?.entities?.Project
+          ?.update
+      ) {
+        return {
+          id,
+          ...data,
+        };
+      }
+
+      return await base44.entities.Project.update(
         id,
         data
       );
@@ -132,9 +157,7 @@ export default function Introduction() {
       });
     },
   });
-console.log(base44);
-console.log(base44.entities);
-console.log(base44.entities?.Project);
+
   const handleNext = async () => {
     try {
       if (!form.name.trim()) {
