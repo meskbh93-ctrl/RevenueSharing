@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { useI18n } from '@/lib/i18n.jsx';
 import { useProject } from '@/lib/projectContext.jsx';
 import { base44 } from '@/api/base44Client';
@@ -32,9 +33,11 @@ import { useNavigate } from 'react-router-dom';
 export default function Services() {
   const { t, lang } = useI18n();
 
-  const { selectedProjectId } = useProject();
+  const { selectedProjectId } =
+    useProject();
 
-  const queryClient = useQueryClient();
+  const queryClient =
+    useQueryClient();
 
   const navigate = useNavigate();
 
@@ -43,33 +46,44 @@ export default function Services() {
   const [formOpen, setFormOpen] =
     useState(false);
 
-  const [editingService, setEditingService] =
-    useState(null);
+  const [
+    editingService,
+    setEditingService,
+  ] = useState(null);
 
   const { data: project } = useQuery({
-    queryKey: ['project', selectedProjectId],
+    queryKey: [
+      'project',
+      selectedProjectId,
+    ],
 
     queryFn: () =>
       base44.entities.Project.list().then(
         (list) =>
           list.find(
-            (p) => p.id === selectedProjectId
+            (p) =>
+              p.id === selectedProjectId
           )
       ),
 
     enabled: !!selectedProjectId,
   });
 
-  const { data: services = [] } = useQuery({
-    queryKey: ['services', selectedProjectId],
+  const { data: services = [] } =
+    useQuery({
+      queryKey: [
+        'services',
+        selectedProjectId,
+      ],
 
-    queryFn: () =>
-      base44.entities.Service.filter({
-        project_id: selectedProjectId,
-      }),
+      queryFn: () =>
+        base44.entities.Service.filter({
+          project_id:
+            selectedProjectId,
+        }),
 
-    enabled: !!selectedProjectId,
-  });
+      enabled: !!selectedProjectId,
+    });
 
   const startYear = project?.start_date
     ? new Date(
@@ -81,12 +95,16 @@ export default function Services() {
     mutationFn: (data) =>
       base44.entities.Service.create({
         ...data,
-        project_id: selectedProjectId,
+        project_id:
+          selectedProjectId,
       }),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['services', selectedProjectId],
+        queryKey: [
+          'services',
+          selectedProjectId,
+        ],
       });
 
       setFormOpen(false);
@@ -102,7 +120,10 @@ export default function Services() {
 
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['services', selectedProjectId],
+        queryKey: [
+          'services',
+          selectedProjectId,
+        ],
       });
 
       setEditingService(null);
@@ -115,7 +136,10 @@ export default function Services() {
 
     onSuccess: () =>
       queryClient.invalidateQueries({
-        queryKey: ['services', selectedProjectId],
+        queryKey: [
+          'services',
+          selectedProjectId,
+        ],
       }),
   });
 
@@ -132,8 +156,8 @@ export default function Services() {
 
         <p className="text-sm opacity-70">
           {lang === 'ar'
-            ? 'يرجى اختيار مشروع أو إنشاء مشروع جديد من القائمة أعلاه'
-            : 'Please select or create a project from the menu above'}
+            ? 'يرجى اختيار مشروع أو إنشاء مشروع جديد'
+            : 'Please select or create a project'}
         </p>
       </div>
     );
@@ -154,14 +178,118 @@ export default function Services() {
 
           <p className="text-sm text-muted-foreground mt-1">
             {lang === 'ar'
-              ? 'إدارة الخدمات مع نسب نمو السعر والكمية لـ 5 سنوات'
-              : 'Manage services with price and quantity growth rates for 5 years'}
+              ? 'إدارة الخدمات والإيرادات'
+              : 'Manage services and revenues'}
           </p>
         </div>
 
         <Button
-          onClick={() => setFormOpen(true)}
+          onClick={() =>
+            setFormOpen(true)
+          }
           className="bg-accent hover:bg-accent/90 text-white gap-1.5"
         >
           <Plus className="w-4 h-4" />
 
+          {isAr
+            ? 'إضافة خدمة'
+            : 'Add Service'}
+        </Button>
+      </div>
+
+      <div className="grid gap-4">
+        {services.map((service) => (
+          <ServiceCard
+            key={service.id}
+            service={service}
+            startYear={startYear}
+            onEdit={() =>
+              setEditingService(service)
+            }
+            onDelete={() =>
+              deleteMutation.mutate(
+                service.id
+              )
+            }
+          />
+        ))}
+      </div>
+
+      <div className="bg-card border border-border rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-2">
+          <TrendingUp className="w-5 h-5 text-primary" />
+
+          <h3 className="font-bold">
+            {isAr
+              ? 'إجمالي الإيرادات'
+              : 'Total Revenue'}
+          </h3>
+        </div>
+
+        <p className="text-2xl font-bold text-primary">
+          {formatNumber(
+            calculateTotalRevenue(
+              services
+            )
+          )}{' '}
+          SAR
+        </p>
+      </div>
+
+      <div className="flex justify-between pt-2">
+        <Button
+          variant="outline"
+          onClick={() =>
+            navigate('/introduction')
+          }
+          className="gap-2"
+        >
+          {isAr ? (
+            <ArrowRight className="w-4 h-4" />
+          ) : (
+            <ArrowLeft className="w-4 h-4" />
+          )}
+
+          {isAr ? 'رجوع' : 'Back'}
+        </Button>
+
+        <Button
+          onClick={() =>
+            navigate('/costs')
+          }
+          className="gap-2"
+        >
+          {isAr ? 'التالي' : 'Next'}
+
+          {isAr ? (
+            <ArrowLeft className="w-4 h-4" />
+          ) : (
+            <ArrowRight className="w-4 h-4" />
+          )}
+        </Button>
+      </div>
+
+      <ServiceForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        onSubmit={(data) =>
+          createMutation.mutate(data)
+        }
+      />
+
+      <ServiceForm
+        open={!!editingService}
+        onOpenChange={() =>
+          setEditingService(null)
+        }
+        initialData={editingService}
+        onSubmit={(data) =>
+          updateMutation.mutate({
+            id: editingService.id,
+            data,
+          })
+        }
+      />
+    </div>
+  );
+}
