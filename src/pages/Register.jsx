@@ -159,8 +159,6 @@ export default function Register() {
             maxLength={6}
             value={otpCode}
             onChange={setOtpCode}
-            autoFocus
-            autoComplete="one-time-code"
           >
             <InputOTPGroup>
               <InputOTPSlot index={0} />
@@ -174,7 +172,7 @@ export default function Register() {
         </div>
 
         <Button
-          className="w-full h-12 font-medium"
+          className="w-full h-12"
           onClick={handleVerify}
           disabled={
             loading ||
@@ -190,16 +188,6 @@ export default function Register() {
             'Verify'
           )}
         </Button>
-
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          Didn&apos;t receive the code?{' '}
-          <button
-            onClick={handleResend}
-            className="text-primary font-medium hover:underline"
-          >
-            Resend
-          </button>
-        </p>
       </AuthLayout>
     );
   }
@@ -223,6 +211,85 @@ export default function Register() {
     >
       <Button
         variant="outline"
-        className="w-full h-12 text-sm font-medium mb-6"
+        className="w-full h-12 mb-6"
         onClick={handleGoogle}
       >
+        <GoogleIcon className="w-5 h-5 mr-2" />
+
+        Continue with Google
+      </Button>
+
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+      >
+        <div className="space-y-2">
+          <Label>Email</Label>
+
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) =>
+              setEmail(e.target.value)
+            }
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Password</Label>
+
+          <Input
+            type="password"
+            value={password}
+            onChange={(e) =>
+              setPassword(
+                e.target.value
+              )
+            }
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>
+            Confirm Password
+          </Label>
+
+          <Input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) =>
+              setConfirmPassword(
+                e.target.value
+              )
+            }
+            required
+          />
+        </div>
+
+        {error && (
+          <div className="text-sm text-red-500">
+            {error}
+          </div>
+        )}
+
+        <Button
+          type="submit"
+          className="w-full h-12"
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Creating account...
+            </>
+          ) : (
+            'Create account'
+          )}
+        </Button>
+      </form>
+    </AuthLayout>
+  );
+}
