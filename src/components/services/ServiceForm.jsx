@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useI18n } from '@/lib/i18n.jsx';
-import { useProject } from '@/lib/projectContext.jsx';
-import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,7 +18,9 @@ const defaultForm = {
 export default function ServiceForm({ open, onClose, onSave, initialData }) {
   const { lang } = useI18n();
   const isAr = lang === 'ar';
-  const { selectedProjectId } = useProject();
+
+  const startYear = new Date().getFullYear();
+  const yearLabels = [0, 1, 2, 3, 4].map(i => String(startYear + 1 + i));
 
   const [form, setForm] = useState(initialData ? { ...defaultForm, ...initialData } : defaultForm);
 
@@ -30,21 +29,6 @@ export default function ServiceForm({ open, onClose, onSave, initialData }) {
       setForm(initialData ? { ...defaultForm, ...initialData } : defaultForm);
     }
   }, [open, initialData]);
-
-  // Fetch project to get start_date
-  const { data: project } = useQuery({
-    queryKey: ['project', selectedProjectId],
-    queryFn: () => base44.entities.Project.list().then(list => list.find(p => p.id === selectedProjectId)),
-    enabled: !!selectedProjectId,
-  });
-
-  // Build year labels from start_date or fallback to current year
-  const startYear = project?.start_date
-    ? new Date(project.start_date).getFullYear()
-    : new Date().getFullYear();
-
-  // Growth rates start from the year AFTER the project start year
-  const yearLabels = [0, 1, 2, 3, 4].map(i => String(startYear + 1 + i));
 
   const handleGrowthChange = (field, index, value) => {
     const arr = [...(form[field] || [0, 0, 0, 0, 0])];
@@ -71,8 +55,6 @@ export default function ServiceForm({ open, onClose, onSave, initialData }) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 pt-1">
-
-          {/* Service Name */}
           <div className="space-y-1.5">
             <Label className="font-semibold text-sm">{isAr ? 'اسم الخدمة' : 'Service Name'}</Label>
             <Input
@@ -83,7 +65,6 @@ export default function ServiceForm({ open, onClose, onSave, initialData }) {
             />
           </div>
 
-          {/* Base Price */}
           <div className="bg-muted/40 rounded-lg p-4 space-y-1.5">
             <Label className="font-bold text-sm">
               {isAr ? 'خط الأساس — المقابل المالي (السعر)' : 'Baseline — Financial Value (Price)'}
@@ -101,10 +82,9 @@ export default function ServiceForm({ open, onClose, onSave, initialData }) {
             />
           </div>
 
-          {/* Price Growth Rates */}
           <div className="space-y-2">
             <Label className="font-bold text-sm">
-              {isAr ? 'نسب نمو المقابل المالي (السعر) (%)' : 'Price Growth Rates (%)'}
+              {isAr ? 'نسب نمو المقابل المالي (%)' : 'Price Growth Rates (%)'}
             </Label>
             <div className="grid grid-cols-5 gap-2">
               {[0, 1, 2, 3, 4].map(i => (
@@ -122,7 +102,6 @@ export default function ServiceForm({ open, onClose, onSave, initialData }) {
             </div>
           </div>
 
-          {/* Base Quantity */}
           <div className="bg-muted/40 rounded-lg p-4 space-y-1.5">
             <Label className="font-bold text-sm">
               {isAr ? 'خط الأساس — الكمية' : 'Baseline — Quantity'}
@@ -140,7 +119,6 @@ export default function ServiceForm({ open, onClose, onSave, initialData }) {
             />
           </div>
 
-          {/* Quantity Growth Rates */}
           <div className="space-y-2">
             <Label className="font-bold text-sm">
               {isAr ? 'نسب نمو الكمية (%)' : 'Quantity Growth Rates (%)'}
@@ -161,7 +139,6 @@ export default function ServiceForm({ open, onClose, onSave, initialData }) {
             </div>
           </div>
 
-          {/* Description */}
           <div className="space-y-1.5">
             <Label className="font-bold text-sm">{isAr ? 'الوصف' : 'Description'}</Label>
             <Textarea
@@ -172,7 +149,6 @@ export default function ServiceForm({ open, onClose, onSave, initialData }) {
             />
           </div>
 
-          {/* Buttons */}
           <div className="flex gap-3 pt-1">
             <Button type="submit" className="bg-accent hover:bg-accent/90 text-white">
               {initialData ? (isAr ? 'حفظ' : 'Save') : (isAr ? 'إضافة' : 'Add')}
