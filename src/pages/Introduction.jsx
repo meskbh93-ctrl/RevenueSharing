@@ -49,7 +49,7 @@ export default function Introduction() {
     ],
 
     queryFn: () =>
-      base44.entities.Project.list().then(
+      base44.entities.project.list().then(
         (list) =>
           list.find(
             (p) =>
