@@ -69,15 +69,6 @@ export default function Introduction() {
     });
 
   useEffect(() => {
-    setForm({
-      name: '',
-      government_entity: '',
-      private_partner: '',
-      description: '',
-    });
-  }, [selectedProjectId]);
-
-  useEffect(() => {
     if (project) {
       setForm({
         name: project.name || '',
@@ -103,7 +94,7 @@ export default function Introduction() {
 
     onSuccess: (newProject) => {
       queryClient.invalidateQueries({
-        queryKey: ['projects'],
+        queryKey: ['projects-home'],
       });
 
       setSelectedProjectId(
@@ -141,34 +132,52 @@ export default function Introduction() {
         return;
       }
 
+      const payload = {
+        name: form.name,
+        government_entity:
+          form.government_entity ||
+          '',
+
+        private_partner:
+          form.private_partner ||
+          '',
+
+        description:
+          form.description || '',
+
+        start_date:
+          new Date()
+            .toISOString()
+            .split('T')[0],
+      };
+
       if (project) {
         await updateMutation.mutateAsync(
           {
             id: project.id,
-            data: form,
+            data: payload,
           }
         );
-
-        navigate('/services');
       } else {
         const newProject =
           await createMutation.mutateAsync(
-            form
+            payload
           );
 
         setSelectedProjectId(
           newProject.id
         );
-
-        navigate('/services');
       }
+
+      navigate('/services');
     } catch (error) {
       console.error(error);
 
       alert(
-        isAr
-          ? 'حدث خطأ'
-          : 'Something went wrong'
+        error?.message ||
+          (isAr
+            ? 'حدث خطأ'
+            : 'Something went wrong')
       );
     }
   };
@@ -304,13 +313,13 @@ export default function Introduction() {
               </div>
             </div>
 
-            <div className="flex justify-end mt-2">
+            <div className="flex justify-end pt-4">
               <Button
                 onClick={handleNext}
                 className="bg-accent hover:bg-accent/90 text-white gap-2"
                 disabled={
-                  updateMutation.isPending ||
-                  createMutation.isPending
+                  createMutation.isPending ||
+                  updateMutation.isPending
                 }
               >
                 {isAr
