@@ -35,14 +35,18 @@ export default function Introduction() {
     setSelectedProjectId,
   } = useProject();
 
-  const queryClient = useQueryClient();
+  const queryClient =
+    useQueryClient();
 
   const navigate = useNavigate();
 
   const isAr = lang === 'ar';
 
   const { data: project } = useQuery({
-    queryKey: ['project', selectedProjectId],
+    queryKey: [
+      'project',
+      selectedProjectId,
+    ],
 
     queryFn: () =>
       base44.entities.Project.list().then(
@@ -56,12 +60,13 @@ export default function Introduction() {
     enabled: !!selectedProjectId,
   });
 
-  const [form, setForm] = useState({
-    name: '',
-    government_entity: '',
-    private_partner: '',
-    description: '',
-  });
+  const [form, setForm] =
+    useState({
+      name: '',
+      government_entity: '',
+      private_partner: '',
+      description: '',
+    });
 
   useEffect(() => {
     setForm({
@@ -92,7 +97,9 @@ export default function Introduction() {
 
   const createMutation = useMutation({
     mutationFn: (data) =>
-      base44.entities.Project.create(data),
+      base44.entities.Project.create(
+        data
+      ),
 
     onSuccess: (newProject) => {
       queryClient.invalidateQueries({
@@ -102,8 +109,6 @@ export default function Introduction() {
       setSelectedProjectId(
         newProject.id
       );
-
-      navigate('/services');
     },
   });
 
@@ -114,29 +119,57 @@ export default function Introduction() {
         data
       ),
 
-    onSuccess: () =>
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [
           'project',
           selectedProjectId,
         ],
-      }),
+      });
+    },
   });
 
-  const handleNext = () => {
-    if (project) {
-      updateMutation.mutate(
-        {
-          id: project.id,
-          data: form,
-        },
-        {
-          onSuccess: () =>
-            navigate('/services'),
-        }
+  const handleNext = async () => {
+    try {
+      if (!form.name.trim()) {
+        alert(
+          isAr
+            ? 'يرجى إدخال اسم المشروع'
+            : 'Please enter project name'
+        );
+
+        return;
+      }
+
+      if (project) {
+        await updateMutation.mutateAsync(
+          {
+            id: project.id,
+            data: form,
+          }
+        );
+
+        navigate('/services');
+      } else {
+        const newProject =
+          await createMutation.mutateAsync(
+            form
+          );
+
+        setSelectedProjectId(
+          newProject.id
+        );
+
+        navigate('/services');
+      }
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        isAr
+          ? 'حدث خطأ'
+          : 'Something went wrong'
       );
-    } else {
-      createMutation.mutate(form);
     }
   };
 
@@ -202,7 +235,8 @@ export default function Introduction() {
                 onChange={(e) =>
                   setForm({
                     ...form,
-                    name: e.target.value,
+                    name:
+                      e.target.value,
                   })
                 }
                 placeholder={
@@ -262,7 +296,7 @@ export default function Introduction() {
                   }
                   placeholder={
                     isAr
-                      ? 'مثال: شركة تك'
+                      ? 'مثال: شركة تقنية'
                       : 'e.g. Tech Company'
                   }
                   className="bg-background/50 text-base"
