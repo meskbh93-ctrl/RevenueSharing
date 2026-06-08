@@ -1,160 +1,169 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+
 import { useI18n } from '@/lib/i18n.jsx';
 import { useProject } from '@/lib/projectContext.jsx';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const defaultForm = {
-  name: '',
-  type: 'operational',
-  base_amount: '',
-  growth_rates: [0, 0, 0, 0, 0],
-  description: '',
-};
+import {
+  Plus,
+  DollarSign,
+  Pencil,
+  Trash2,
+  ArrowLeft,
+  ArrowRight,
+} from 'lucide-react';
 
-export default function CostForm({ open, onClose, onSave, initialData }) {
-  const { lang } = useI18n();
-  const isAr = lang === 'ar';
+import CostForm from '@/components/costs/CostForm';
+
+import {
+  calculateTotalCosts,
+  formatNumber,
+} from '@/lib/calculations';
+
+import { useNavigate } from 'react-router-dom';
+
+export default function Costs() {
+  const { t, lang } = useI18n();
   const { selectedProjectId } = useProject();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const isAr = lang === 'ar';
 
-  const [form, setForm] = useState(initialData ? { ...defaultForm, ...initialData } : defaultForm);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingCost, setEditingCost] = useState(null);
 
-  useEffect(() => {
-    if (open) {
-      setForm(initialData ? { ...defaultForm, ...initialData } : { ...defaultForm });
-    }
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const { data: project } = useQuery({
-    queryKey: ['project', selectedProjectId],
-    queryFn: () => base44.entities.Project.list().then(list => list.find(p => p.id === selectedProjectId)),
+  const { data: costs = [] } = useQuery({
+    queryKey: ['costs', selectedProjectId],
+    queryFn: () =>
+      base44.entities.Cost.filter({ project_id: selectedProjectId }),
     enabled: !!selectedProjectId,
   });
 
-  const startYear = project?.start_date
-    ? new Date(project.start_date).getFullYear()
-    : new Date().getFullYear();
+  const createMutation = useMutation({
+    mutationFn: (data) =>
+      base44.entities.Cost.create({ ...data, project_id: selectedProjectId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['costs', selectedProjectId] });
+      setFormOpen(false);
+    },
+  });
 
-  // Growth rates start from year AFTER start year
-  const yearLabels = [0, 1, 2, 3, 4].map(i => String(startYear + 1 + i));
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Cost.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['costs', selectedProjectId] });
+      setEditingCost(null);
+    },
+  });
 
-  const handleGrowthChange = (index, value) => {
-    const arr = [...(form.growth_rates || [0, 0, 0, 0, 0])];
-    arr[index] = Number(value) || 0;
-    setForm({ ...form, growth_rates: arr });
-  };
+  const deleteMutation = useMutation({
+    mutationFn: (id) => base44.entities.Cost.delete(id),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['costs', selectedProjectId] }),
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSave({ ...form, base_amount: Number(form.base_amount) });
-  };
+  if (!selectedProjectId) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[40vh] text-muted-foreground">
+        <DollarSign className="w-12 h-12 mb-3 opacity-30" />
+        <p>{isAr ? 'اختر مشروعاً أولاً' : 'Select a project first'}</p>
+      </div>
+    );
+  }
+
+  const totals = calculateTotalCosts(costs);
+  const totalCosts = totals.reduce((sum, item) => sum + item.total, 0);
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto" dir={isAr ? 'rtl' : 'ltr'}>
-        <DialogHeader>
-          <DialogTitle className="text-lg font-bold">
-            {initialData ? (isAr ? 'تعديل تكلفة' : 'Edit Cost') : (isAr ? 'إضافة تكلفة' : 'Add Cost')}
-          </DialogTitle>
-        </DialogHeader>
+    <div className="space-y-6 max-w-4xl mx-auto">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <DollarSign className="w-6 h-6" />
+            {isAr ? 'التكاليف' : 'Costs'}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {isAr ? 'إدارة التكاليف' : 'Manage project costs'}
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 pt-1">
+        <Button onClick={() => setFormOpen(true)} className="gap-2">
+          <Plus className="w-4 h-4" />
+          {isAr ? 'إضافة تكلفة' : 'Add Cost'}
+        </Button>
+      </div>
 
-          {/* Cost Name */}
-          <div className="space-y-1.5">
-            <Label className="font-semibold text-sm">{isAr ? 'اسم التكلفة' : 'Cost Name'}</Label>
-            <Input
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              placeholder={isAr ? 'مثال: صيانة الخادم' : 'e.g. Server Maintenance'}
-              required
-            />
-          </div>
+      <div className="bg-card border border-border rounded-xl p-5">
+        <p className="text-sm text-muted-foreground mb-1">
+          {isAr ? 'إجمالي التكاليف' : 'Total Costs'}
+        </p>
+        <p className="text-3xl font-bold">
+          {formatNumber(totalCosts)} SAR
+        </p>
+      </div>
 
-          {/* Type */}
-          <div className="space-y-1.5">
-            <Label className="font-semibold text-sm">{isAr ? 'النوع' : 'Type'}</Label>
-            <Select value={form.type} onValueChange={v => setForm({ ...form, type: v })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="operational">{isAr ? 'تشغيلي' : 'Operational'}</SelectItem>
-                <SelectItem value="capital">{isAr ? 'رأسمالي' : 'Capital'}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Base Amount */}
-          <div className="bg-muted/40 rounded-lg p-4 space-y-1.5">
-            <Label className="font-bold text-sm">
-              {isAr ? 'خط الأساس ($)' : 'Baseline ($)'}
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              {isAr ? 'المبلغ المرجعي قبل تطبيق أي نسبة نمو' : 'Reference amount before applying any growth rate'}
-            </p>
-            <Input
-              type="text"
-              inputMode="decimal"
-              value={form.base_amount}
-              onChange={e => setForm({ ...form, base_amount: e.target.value })}
-              className="text-end"
-              required
-            />
-          </div>
-
-          {/* Growth Rates */}
-          <div className="space-y-2">
-            <Label className="font-bold text-sm">
-              {isAr ? 'نسب النمو السنوية (%)' : 'Annual Growth Rates (%)'}
-            </Label>
-            <p className="text-xs text-muted-foreground">
-              {isAr ? 'تُطَبَّق على خط الأساس بشكل تراكمي' : 'Applied cumulatively on the baseline'}
-            </p>
-            <div className="grid grid-cols-5 gap-2">
-              {[0, 1, 2, 3, 4].map(i => (
-                <div key={i} className="space-y-1">
-                  <span className="text-xs text-muted-foreground block text-center">{yearLabels[i]}</span>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
-                    value={form.growth_rates?.[i] ?? 0}
-                    onChange={e => handleGrowthChange(i, e.target.value)}
-                    className="text-center text-sm h-9"
-                  />
-                </div>
-              ))}
+      <div className="grid gap-4">
+        {costs.map((cost) => (
+          <div key={cost.id} className="bg-card border border-border rounded-xl p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-bold">{cost.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {formatNumber(cost.amount || 0)} SAR
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => setEditingCost(cost)}
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="destructive"
+                  onClick={() => deleteMutation.mutate(cost.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
+        ))}
+      </div>
 
-          {/* Description */}
-          <div className="space-y-1.5">
-            <Label className="font-bold text-sm">{isAr ? 'الوصف' : 'Description'}</Label>
-            <Textarea
-              value={form.description || ''}
-              onChange={e => setForm({ ...form, description: e.target.value })}
-              placeholder={isAr ? 'وصف اختياري' : 'Optional description'}
-              className="h-20 resize-none"
-            />
-          </div>
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => navigate('/services')}>
+          {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+        </Button>
+        <Button onClick={() => navigate('/dashboard')}>
+          {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+        </Button>
+      </div>
 
-          {/* Buttons */}
-          <div className="flex gap-3 pt-1">
-            <Button type="submit" className="bg-accent hover:bg-accent/90 text-white">
-              {initialData ? (isAr ? 'حفظ' : 'Save') : (isAr ? 'إضافة' : 'Add')}
-            </Button>
-            <Button type="button" variant="ghost" onClick={onClose}>
-              {isAr ? 'إلغاء' : 'Cancel'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <CostForm
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onSave={(data) => createMutation.mutate(data)}
+      />
+
+      <CostForm
+        open={!!editingCost}
+        onClose={() => setEditingCost(null)}
+        initialData={editingCost}
+        onSave={(data) =>
+          updateMutation.mutate({ id: editingCost.id, data })
+        }
+      />
+    </div>
   );
 }
