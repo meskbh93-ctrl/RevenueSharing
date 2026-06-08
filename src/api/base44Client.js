@@ -12,9 +12,7 @@ export const base44 = createClient({
   appId,
   token,
   functionsVersion,
-  serverUrl: '',
-  requiresAuth: false,
   appBaseUrl,
 });
 
-console.log(base44);
+console.log('BASE44', base44);
