@@ -8,57 +8,89 @@ export const base44 = {
   entities: {
     Project: {
       list: async () => [],
-      create: async (data) => ({
-        id: Date.now(),
-        ...data,
-      }),
-      update: async (id, data) => ({
-        id,
-        ...data,
-      }),
-      delete: async () => {},
+
+      create: async (data) => {
+        return {
+          id: Date.now(),
+          ...data,
+        };
+      },
+
+      update: async (id, data) => {
+        return {
+          id,
+          ...data,
+        };
+      },
+
+      delete: async () => true,
+
       filter: async () => [],
     },
 
     Service: {
       list: async () => [],
-      create: async (data) => ({
-        id: Date.now(),
-        ...data,
-      }),
-      update: async (id, data) => ({
-        id,
-        ...data,
-      }),
-      delete: async () => {},
+
+      create: async (data) => {
+        return {
+          id: Date.now(),
+          ...data,
+        };
+      },
+
+      update: async (id, data) => {
+        return {
+          id,
+          ...data,
+        };
+      },
+
+      delete: async () => true,
+
       filter: async () => [],
     },
 
     Cost: {
       list: async () => [],
-      create: async (data) => ({
-        id: Date.now(),
-        ...data,
-      }),
-      update: async (id, data) => ({
-        id,
-        ...data,
-      }),
-      delete: async () => {},
+
+      create: async (data) => {
+        return {
+          id: Date.now(),
+          ...data,
+        };
+      },
+
+      update: async (id, data) => {
+        return {
+          id,
+          ...data,
+        };
+      },
+
+      delete: async () => true,
+
       filter: async () => [],
     },
 
     IncomeSharing: {
       list: async () => [],
-      create: async (data) => ({
-        id: Date.now(),
-        ...data,
-      }),
-      update: async (id, data) => ({
-        id,
-        ...data,
-      }),
-      delete: async () => {},
+
+      create: async (data) => {
+        return {
+          id: Date.now(),
+          ...data,
+        };
+      },
+
+      update: async (id, data) => {
+        return {
+          id,
+          ...data,
+        };
+      },
+
+      delete: async () => true,
+
       filter: async () => [],
     },
   },
