@@ -141,7 +141,7 @@ export default function Services() {
           </h3>
         </div>
         <p className="text-2xl font-bold text-primary">
-          {formatNumber(calculateTotalRevenue(services))} SAR
+         {formatNumber(calculateTotalRevenue(services).reduce((s, r) => s + r.revenue, 0))} SAR
         </p>
       </div>
 
