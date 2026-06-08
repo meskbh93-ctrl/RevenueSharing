@@ -1,27 +1,16 @@
 import React, { useRef, useState } from 'react';
+
 import { useI18n } from '@/lib/i18n.jsx';
 import { useProject } from '@/lib/projectContext.jsx';
 import { base44 } from '@/api/base44Client';
 
 import { useQuery } from '@tanstack/react-query';
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-
 import { Button } from '@/components/ui/button';
 
 import {
   LayoutDashboard,
   DollarSign,
-  Building2,
-  Handshake,
-  Wrench,
-  Landmark,
-  Calculator,
   Printer,
 } from 'lucide-react';
 
@@ -51,39 +40,40 @@ import {
 
 import { motion } from 'framer-motion';
 
+const COLORS = [
+  '#EAB308',
+  '#94A3B8',
+];
+
 function StatCard({
   title,
   value,
   subtitle,
-  icon: Icon,
-  iconColor,
   delay,
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{
+        opacity: 0,
+        y: 20,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
       transition={{ delay }}
     >
       <div className="bg-card border border-border rounded-xl p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div
-            className={`w-9 h-9 rounded-xl ${iconColor} flex items-center justify-center`}
-          >
-            <Icon className="w-5 h-5 text-white" />
-          </div>
+        <p className="text-sm text-muted-foreground mb-2">
+          {title}
+        </p>
 
-          <p className="text-sm font-bold text-center flex-1">
-            {title}
-          </p>
-        </div>
-
-        <p className="text-2xl font-bold text-center">
+        <p className="text-2xl font-bold">
           {value}
         </p>
 
         {subtitle && (
-          <p className="text-xs text-muted-foreground text-center mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {subtitle}
           </p>
         )}
@@ -97,62 +87,82 @@ export default function Dashboard() {
 
   const {
     selectedProjectId,
-    selectedProject,
   } = useProject();
 
-  const dashboardRef = useRef();
-
-  const chartRef1 = useRef();
-  const chartRef2 = useRef();
-  const chartRef3 = useRef();
-  const chartRef4 = useRef();
+  const dashboardRef =
+    useRef();
 
   const [pdfLoading, setPdfLoading] =
     useState(false);
 
+  const isAr = lang === 'ar';
+
   const { data: project } = useQuery({
-    queryKey: ['project', selectedProjectId],
+    queryKey: [
+      'project',
+      selectedProjectId,
+    ],
 
     queryFn: () =>
       base44.entities.Project.list().then(
         (list) =>
           list.find(
-            (p) => p.id === selectedProjectId
+            (p) =>
+              p.id === selectedProjectId
           )
       ),
 
     enabled: !!selectedProjectId,
   });
 
-  const { data: services = [] } = useQuery({
-    queryKey: ['services', selectedProjectId],
+  const {
+    data: services = [],
+  } = useQuery({
+    queryKey: [
+      'services',
+      selectedProjectId,
+    ],
 
     queryFn: () =>
       base44.entities.Service.filter({
-        project_id: selectedProjectId,
+        project_id:
+          selectedProjectId,
       }),
 
     enabled: !!selectedProjectId,
   });
 
-  const { data: costs = [] } = useQuery({
-    queryKey: ['costs', selectedProjectId],
+  const { data: costs = [] } =
+    useQuery({
+      queryKey: [
+        'costs',
+        selectedProjectId,
+      ],
+
+      queryFn: () =>
+        base44.entities.Cost.filter({
+          project_id:
+            selectedProjectId,
+        }),
+
+      enabled: !!selectedProjectId,
+    });
+
+  const {
+    data: sharings = [],
+  } = useQuery({
+    queryKey: [
+      'sharing',
+      selectedProjectId,
+    ],
 
     queryFn: () =>
-      base44.entities.Cost.filter({
-        project_id: selectedProjectId,
-      }),
-
-    enabled: !!selectedProjectId,
-  });
-
-  const { data: sharings = [] } = useQuery({
-    queryKey: ['sharing', selectedProjectId],
-
-    queryFn: () =>
-      base44.entities.IncomeSharing.filter({
-        project_id: selectedProjectId,
-      }),
+      base44.entities.IncomeSharing.filter(
+        {
+          project_id:
+            selectedProjectId,
+        }
+      ),
 
     enabled: !!selectedProjectId,
   });
@@ -160,7 +170,9 @@ export default function Dashboard() {
   const sharing = sharings[0];
 
   const revenueData =
-    calculateTotalRevenue(services);
+    calculateTotalRevenue(
+      services
+    );
 
   const costData =
     calculateTotalCosts(costs);
@@ -182,56 +194,109 @@ export default function Dashboard() {
     0
   );
 
-  const totalNet = totalRev - totalCost;
+  const totalNet =
+    totalRev - totalCost;
 
   const totalGov =
     distribution.reduce(
-const handleDownloadPDF = async () => {
-    setPdfLoading(true);
+      (s, d) =>
+        s + d.governmentAmount,
+      0
+    );
 
-    try {
-      const canvas = await html2canvas(
-        dashboardRef.current,
-        {
-          scale: 2,
-          useCORS: true,
-        }
-      );
+  const totalPartner =
+    distribution.reduce(
+      (s, d) =>
+        s + d.partnerAmount,
+      0
+    );
 
-      const imgData =
-        canvas.toDataURL('image/png');
+  const chartData = distribution.map(
+    (d, i) => ({
+      year:
+        new Date().getFullYear() +
+        i +
+        1,
 
-      const pdf = new jsPDF(
-        'p',
-        'mm',
-        'a4'
-      );
+      government:
+        d.governmentAmount,
 
-      const pdfWidth =
-        pdf.internal.pageSize.getWidth();
+      partner: d.partnerAmount,
+    })
+  );
 
-      const pdfHeight =
-        (canvas.height * pdfWidth) /
-        canvas.width;
+  const pieData = [
+    {
+      name: isAr
+        ? 'الحكومة'
+        : 'Government',
 
-      pdf.addImage(
-        imgData,
-        'PNG',
-        0,
-        0,
-        pdfWidth,
-        pdfHeight
-      );
+      value: totalGov,
+    },
 
-      pdf.save(
-        `dashboard-${project?.name || 'report'}.pdf`
-      );
-    } catch (error) {
-      console.error(error);
-    }
+    {
+      name: isAr
+        ? 'الشريك'
+        : 'Partner',
 
-    setPdfLoading(false);
-  };
+      value: totalPartner,
+    },
+  ];
+
+  const handleDownloadPDF =
+    async () => {
+      setPdfLoading(true);
+
+      try {
+        const canvas =
+          await html2canvas(
+            dashboardRef.current,
+            {
+              scale: 2,
+              useCORS: true,
+            }
+          );
+
+        const imgData =
+          canvas.toDataURL(
+            'image/png'
+          );
+
+        const pdf = new jsPDF(
+          'p',
+          'mm',
+          'a4'
+        );
+
+        const pdfWidth =
+          pdf.internal.pageSize.getWidth();
+
+        const pdfHeight =
+          (canvas.height *
+            pdfWidth) /
+          canvas.width;
+
+        pdf.addImage(
+          imgData,
+          'PNG',
+          0,
+          0,
+          pdfWidth,
+          pdfHeight
+        );
+
+        pdf.save(
+          `dashboard-${
+            project?.name ||
+            'report'
+          }.pdf`
+        );
+      } catch (error) {
+        console.error(error);
+      }
+
+      setPdfLoading(false);
+    };
 
   if (!selectedProjectId) {
     return (
@@ -250,8 +315,7 @@ const handleDownloadPDF = async () => {
     >
       <div className="flex items-start justify-between">
         <div
-          dir={lang === 'ar' ? 'rtl' : 'ltr'}
-          className="text-start"
+          dir={isAr ? 'rtl' : 'ltr'}
         >
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <LayoutDashboard className="w-6 h-6" />
@@ -260,10 +324,152 @@ const handleDownloadPDF = async () => {
           </h2>
 
           <p className="text-sm text-muted-foreground mt-1">
-            {lang === 'ar'
-              ? 'المشاركة في الدخل — نظرة عامة وتحليلات'
-              : 'Income Sharing — Overview & Analytics'}
+            {isAr
+              ? 'لوحة التحكم والتحليلات'
+              : 'Dashboard & Analytics'}
           </p>
         </div>
 
         <Button
+          onClick={
+            handleDownloadPDF
+          }
+          disabled={pdfLoading}
+          className="gap-2"
+        >
+          <Printer className="w-4 h-4" />
+
+          {pdfLoading
+            ? 'Loading...'
+            : isAr
+            ? 'تصدير PDF'
+            : 'Export PDF'}
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <StatCard
+          title={
+            isAr
+              ? 'الإيرادات'
+              : 'Revenue'
+          }
+          value={`${formatNumber(
+            totalRev
+          )} SAR`}
+          delay={0}
+        />
+
+        <StatCard
+          title={
+            isAr
+              ? 'التكاليف'
+              : 'Costs'
+          }
+          value={`${formatNumber(
+            totalCost
+          )} SAR`}
+          delay={0.1}
+        />
+
+        <StatCard
+          title={
+            isAr
+              ? 'صافي الدخل'
+              : 'Net Income'
+          }
+          value={`${formatNumber(
+            totalNet
+          )} SAR`}
+          delay={0.2}
+        />
+
+        <StatCard
+          title={
+            isAr
+              ? 'حصة الحكومة'
+              : 'Government Share'
+          }
+          value={`${formatNumber(
+            totalGov
+          )} SAR`}
+          delay={0.3}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="bg-card border border-border rounded-xl p-4">
+          <h3 className="font-bold mb-4">
+            {isAr
+              ? 'توزيع الدخل'
+              : 'Income Distribution'}
+          </h3>
+
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+          >
+            <BarChart
+              data={chartData}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+
+              <XAxis dataKey="year" />
+
+              <YAxis />
+
+              <Tooltip />
+
+              <Legend />
+
+              <Bar
+                dataKey="government"
+                fill={COLORS[0]}
+              />
+
+              <Bar
+                dataKey="partner"
+                fill={COLORS[1]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-4">
+          <h3 className="font-bold mb-4">
+            {isAr
+              ? 'النسب الإجمالية'
+              : 'Total Split'}
+          </h3>
+
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+          >
+            <PieChart>
+              <Pie
+                data={pieData}
+                dataKey="value"
+                outerRadius={100}
+                label
+              >
+                {pieData.map(
+                  (entry, index) => (
+                    <Cell
+                      key={index}
+                      fill={
+                        COLORS[index]
+                      }
+                    />
+                  )
+                )}
+              </Pie>
+
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+}
