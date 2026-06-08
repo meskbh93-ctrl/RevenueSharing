@@ -7,91 +7,59 @@ export const base44 = {
 
   entities: {
     Project: {
+      create: async (data) => ({
+        id: Date.now(),
+        ...data,
+      }),
+
+      update: async (id, data) => ({
+        id,
+        ...data,
+      }),
+
       list: async () => [],
-
-      create: async (data) => {
-        return {
-          id: Date.now(),
-          ...data,
-        };
-      },
-
-      update: async (id, data) => {
-        return {
-          id,
-          ...data,
-        };
-      },
-
-      delete: async () => true,
-
-      filter: async () => [],
     },
 
     Service: {
+      create: async (data) => ({
+        id: Date.now(),
+        ...data,
+      }),
+
+      update: async (id, data) => ({
+        id,
+        ...data,
+      }),
+
       list: async () => [],
-
-      create: async (data) => {
-        return {
-          id: Date.now(),
-          ...data,
-        };
-      },
-
-      update: async (id, data) => {
-        return {
-          id,
-          ...data,
-        };
-      },
-
-      delete: async () => true,
-
-      filter: async () => [],
     },
 
     Cost: {
+      create: async (data) => ({
+        id: Date.now(),
+        ...data,
+      }),
+
+      update: async (id, data) => ({
+        id,
+        ...data,
+      }),
+
       list: async () => [],
-
-      create: async (data) => {
-        return {
-          id: Date.now(),
-          ...data,
-        };
-      },
-
-      update: async (id, data) => {
-        return {
-          id,
-          ...data,
-        };
-      },
-
-      delete: async () => true,
-
-      filter: async () => [],
     },
 
     IncomeSharing: {
+      create: async (data) => ({
+        id: Date.now(),
+        ...data,
+      }),
+
+      update: async (id, data) => ({
+        id,
+        ...data,
+      }),
+
       list: async () => [],
-
-      create: async (data) => {
-        return {
-          id: Date.now(),
-          ...data,
-        };
-      },
-
-      update: async (id, data) => {
-        return {
-          id,
-          ...data,
-        };
-      },
-
-      delete: async () => true,
-
-      filter: async () => [],
     },
   },
 };
