@@ -1,18 +1,65 @@
-import { createClient } from '@base44/sdk';
-import { appParams } from '@/lib/app-params';
+export const base44 = {
+  auth: {
+    me: async () => null,
+    logout: () => {},
+    redirectToLogin: () => {},
+  },
 
-const {
-  appId,
-  token,
-  functionsVersion,
-  appBaseUrl,
-} = appParams;
+  entities: {
+    Project: {
+      list: async () => [],
+      create: async (data) => ({
+        id: Date.now(),
+        ...data,
+      }),
+      update: async (id, data) => ({
+        id,
+        ...data,
+      }),
+      delete: async () => {},
+      filter: async () => [],
+    },
 
-export const base44 = createClient({
-  appId,
-  token,
-  functionsVersion,
-  appBaseUrl,
-});
+    Service: {
+      list: async () => [],
+      create: async (data) => ({
+        id: Date.now(),
+        ...data,
+      }),
+      update: async (id, data) => ({
+        id,
+        ...data,
+      }),
+      delete: async () => {},
+      filter: async () => [],
+    },
 
-console.log('BASE44', base44);
+    Cost: {
+      list: async () => [],
+      create: async (data) => ({
+        id: Date.now(),
+        ...data,
+      }),
+      update: async (id, data) => ({
+        id,
+        ...data,
+      }),
+      delete: async () => {},
+      filter: async () => [],
+    },
+
+    IncomeSharing: {
+      list: async () => [],
+      create: async (data) => ({
+        id: Date.now(),
+        ...data,
+      }),
+      update: async (id, data) => ({
+        id,
+        ...data,
+      }),
+      delete: async () => {},
+      filter: async () => [],
+    },
+  },
+};
