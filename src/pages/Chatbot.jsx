@@ -6,3 +6,4 @@ export default function Chatbot() {
       </h1>
     </div>
   );
+}
