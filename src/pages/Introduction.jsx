@@ -59,7 +59,7 @@ export default function Introduction() {
     queryFn: async () => {
       try {
         const list =
-          await base44.entities.projects.list();
+          await base44.entities.Projects.list();
 
         return list.find(
           (p) =>
@@ -94,7 +94,7 @@ export default function Introduction() {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      return await base44.entities.projects.create(
+      return await base44.entities.Projects.create(
         data
       );
     },
@@ -117,7 +117,7 @@ export default function Introduction() {
       id,
       data,
     }) => {
-      return await base44.entities.projects.update(
+      return await base44.entities.Projects.update(
         id,
         data
       );
