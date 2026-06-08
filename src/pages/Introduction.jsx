@@ -132,7 +132,9 @@ export default function Introduction() {
       });
     },
   });
-
+console.log(base44);
+console.log(base44.entities);
+console.log(base44.entities?.Project);
   const handleNext = async () => {
     try {
       if (!form.name.trim()) {
