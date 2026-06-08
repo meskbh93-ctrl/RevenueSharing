@@ -42,24 +42,6 @@ export default function Introduction() {
 
   const isAr = lang === 'ar';
 
-  const { data: project } = useQuery({
-    queryKey: [
-      'project',
-      selectedProjectId,
-    ],
-
-    queryFn: () =>
-      base44.entities.project.list().then(
-        (list) =>
-          list.find(
-            (p) =>
-              p.id === selectedProjectId
-          )
-      ),
-
-    enabled: !!selectedProjectId,
-  });
-
   const [form, setForm] =
     useState({
       name: '',
@@ -67,6 +49,30 @@ export default function Introduction() {
       private_partner: '',
       description: '',
     });
+
+  const { data: project } = useQuery({
+    queryKey: [
+      'project',
+      selectedProjectId,
+    ],
+
+    queryFn: async () => {
+      try {
+        const list =
+          await base44.entities.projects.list();
+
+        return list.find(
+          (p) =>
+            p.id === selectedProjectId
+        );
+      } catch (error) {
+        console.error(error);
+        return null;
+      }
+    },
+
+    enabled: !!selectedProjectId,
+  });
 
   useEffect(() => {
     if (project) {
@@ -87,28 +93,35 @@ export default function Introduction() {
   }, [project]);
 
   const createMutation = useMutation({
-    mutationFn: (data) =>
-      base44.entities.Project.create(
+    mutationFn: async (data) => {
+      return await base44.entities.projects.create(
         data
-      ),
+      );
+    },
 
     onSuccess: (newProject) => {
       queryClient.invalidateQueries({
-        queryKey: ['projects-home'],
+        queryKey: ['projects'],
       });
 
-      setSelectedProjectId(
-        newProject.id
-      );
+      if (newProject?.id) {
+        setSelectedProjectId(
+          newProject.id
+        );
+      }
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) =>
-      base44.entities.Project.update(
+    mutationFn: async ({
+      id,
+      data,
+    }) => {
+      return await base44.entities.projects.update(
         id,
         data
-      ),
+      );
+    },
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -151,7 +164,7 @@ export default function Introduction() {
             .split('T')[0],
       };
 
-      if (project) {
+      if (project?.id) {
         await updateMutation.mutateAsync(
           {
             id: project.id,
@@ -164,9 +177,11 @@ export default function Introduction() {
             payload
           );
 
-        setSelectedProjectId(
-          newProject.id
-        );
+        if (newProject?.id) {
+          setSelectedProjectId(
+            newProject.id
+          );
+        }
       }
 
       navigate('/services');
@@ -176,8 +191,8 @@ export default function Introduction() {
       alert(
         error?.message ||
           (isAr
-            ? 'حدث خطأ'
-            : 'Something went wrong')
+            ? 'حدث خطأ أثناء إنشاء المشروع'
+            : 'Failed to create project')
       );
     }
   };
