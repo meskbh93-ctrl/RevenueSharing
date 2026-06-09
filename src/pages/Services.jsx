@@ -31,97 +31,136 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 export default function Services() {
-  const { t, lang } = useI18n();
-  const { selectedProjectId } = useProject();
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const isAr = lang === 'ar';
 
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingService, setEditingService] = useState(null);
+  const { t, lang } =
+    useI18n();
 
-  const { data: project } = useQuery({
-    queryKey: ['project', selectedProjectId],
-    queryFn: () =>
-      base44.entities.Project.list().then(
-        (list) =>
-          list.find(
-            (p) =>
-              p.id === selectedProjectId
-          )
-      ),
-    enabled: !!selectedProjectId,
-  });
+  const {
+    selectedProjectId,
+  } = useProject();
 
-  const { data: services = [] } = useQuery({
-    queryKey: ['services', selectedProjectId],
-    queryFn: () =>
-      base44.entities.Service.filter({
-        project_id: selectedProjectId,
-      }),
-    enabled: !!selectedProjectId,
-  });
+  const queryClient =
+    useQueryClient();
 
-  const startYear = project?.start_date
-    ? new Date(
-        project.start_date
-      ).getFullYear() + 1
-    : new Date().getFullYear() + 1;
+  const navigate =
+    useNavigate();
 
-  const createMutation = useMutation({
-    mutationFn: (data) =>
-      base44.entities.Service.create({
-        ...data,
-        project_id: selectedProjectId,
-      }),
+  const isAr =
+    lang === 'ar';
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          'services',
-          selectedProjectId,
-        ],
-      });
+  const [formOpen, setFormOpen] =
+    useState(false);
 
-      setFormOpen(false);
-    },
-  });
+  const [editingService, setEditingService] =
+    useState(null);
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) =>
-      base44.entities.Service.update(
+  const { data: project } =
+    useQuery({
+      queryKey: [
+        'project',
+        selectedProjectId,
+      ],
+
+      queryFn: () =>
+        base44.entities.Project.list().then(
+          (list) =>
+            list.find(
+              (p) =>
+                p.id ===
+                selectedProjectId
+            )
+        ),
+
+      enabled:
+        !!selectedProjectId,
+    });
+
+  const { data: services = [] } =
+    useQuery({
+      queryKey: [
+        'services',
+        selectedProjectId,
+      ],
+
+      queryFn: () =>
+        base44.entities.Service.filter({
+          project_id:
+            selectedProjectId,
+        }),
+
+      enabled:
+        !!selectedProjectId,
+    });
+
+  const startYear =
+    project?.start_date
+      ? new Date(
+          project.start_date
+        ).getFullYear() + 1
+      : new Date().getFullYear() + 1;
+
+  const createMutation =
+    useMutation({
+      mutationFn: (data) =>
+        base44.entities.Service.create({
+          ...data,
+          project_id:
+            selectedProjectId,
+        }),
+
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'services',
+            selectedProjectId,
+          ],
+        });
+
+        setFormOpen(false);
+      },
+    });
+
+  const updateMutation =
+    useMutation({
+      mutationFn: ({
         id,
-        data
-      ),
+        data,
+      }) =>
+        base44.entities.Service.update(
+          id,
+          data
+        ),
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          'services',
-          selectedProjectId,
-        ],
-      });
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: [
+            'services',
+            selectedProjectId,
+          ],
+        });
 
-      setEditingService(null);
-    },
-  });
+        setEditingService(null);
+      },
+    });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id) =>
-      base44.entities.Service.delete(id),
+  const deleteMutation =
+    useMutation({
+      mutationFn: (id) =>
+        base44.entities.Service.delete(id),
 
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: [
-          'services',
-          selectedProjectId,
-        ],
-      }),
-  });
+      onSuccess: () =>
+        queryClient.invalidateQueries({
+          queryKey: [
+            'services',
+            selectedProjectId,
+          ],
+        }),
+    });
 
   if (!selectedProjectId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-muted-foreground gap-3">
+
         <Package className="w-16 h-16 opacity-20" />
 
         <p className="text-lg font-medium">
@@ -135,6 +174,7 @@ export default function Services() {
             ? 'يرجى اختيار مشروع أو إنشاء مشروع جديد'
             : 'Please select or create a project'}
         </p>
+
       </div>
     );
   }
@@ -145,12 +185,18 @@ export default function Services() {
       <div className="flex items-start justify-between">
 
         <div
-          dir={isAr ? 'rtl' : 'ltr'}
+          dir={
+            isAr ? 'rtl' : 'ltr'
+          }
           className="text-start"
         >
+
           <h2 className="text-3xl font-bold flex items-center gap-2">
+
             <Package className="w-7 h-7" />
+
             {t('services')}
+
           </h2>
 
           <p className="text-sm text-muted-foreground mt-1">
@@ -158,6 +204,7 @@ export default function Services() {
               ? 'إدارة الخدمات والإيرادات'
               : 'Manage services and revenues'}
           </p>
+
         </div>
 
         <Button
@@ -171,11 +218,13 @@ export default function Services() {
             gap-2
           "
         >
+
           <Plus className="w-4 h-4" />
 
           {isAr
             ? 'إضافة خدمة'
             : 'Add Service'}
+
         </Button>
 
       </div>
@@ -191,6 +240,7 @@ export default function Services() {
           </div>
 
           <div>
+
             <p className="text-sm text-muted-foreground">
               {isAr
                 ? 'إجمالي الإيرادات'
@@ -198,6 +248,7 @@ export default function Services() {
             </p>
 
             <h3 className="text-3xl font-bold text-primary">
+
               {formatNumber(
                 calculateTotalRevenue(
                   services
@@ -208,7 +259,9 @@ export default function Services() {
                 )
               )}{' '}
               SAR
+
             </h3>
+
           </div>
 
         </div>
@@ -229,6 +282,7 @@ export default function Services() {
                 text-center
               "
             >
+
               <p className="text-xs text-muted-foreground mb-1">
                 {startYear + i}
               </p>
@@ -238,6 +292,7 @@ export default function Services() {
                   item.revenue
                 )}
               </p>
+
             </div>
           ))}
 
@@ -284,6 +339,7 @@ export default function Services() {
             text-center
           "
         >
+
           <Package className="w-14 h-14 mx-auto mb-4 opacity-20" />
 
           <h3 className="text-lg font-bold mb-2">
@@ -297,6 +353,7 @@ export default function Services() {
               ? 'ابدأ بإضافة أول خدمة للمشروع'
               : 'Start by adding your first service'}
           </p>
+
         </div>
       )}
 
@@ -313,13 +370,17 @@ export default function Services() {
           }
           className="gap-2"
         >
+
           {isAr ? (
             <ArrowRight className="w-4 h-4" />
           ) : (
             <ArrowLeft className="w-4 h-4" />
           )}
 
-          {isAr ? 'رجوع' : 'Back'}
+          {isAr
+            ? 'رجوع'
+            : 'Back'}
+
         </Button>
 
         <Button
@@ -333,6 +394,7 @@ export default function Services() {
             text-white
           "
         >
+
           {isAr
             ? 'التالي'
             : 'Next'}
@@ -342,6 +404,7 @@ export default function Services() {
           ) : (
             <ArrowRight className="w-4 h-4" />
           )}
+
         </Button>
 
       </div>
