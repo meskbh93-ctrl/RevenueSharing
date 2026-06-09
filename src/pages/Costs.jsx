@@ -145,7 +145,7 @@ export default function Costs() {
         <Button variant="outline" onClick={() => navigate('/services')}>
           {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
         </Button>
-        <Button onClick={() => navigate('/dashboard')}>
+        <Button onClick={() => navigate('/income-sharing')}>
           {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
         </Button>
       </div>
