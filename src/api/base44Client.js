@@ -59,7 +59,16 @@ export const base44 = {
         return data || [];
       },
 
-      filter: async () => [],
+      filter: async () => {
+        const { data, error } =
+          await supabase
+            .from('projects')
+            .select('*');
+
+        if (error) throw error;
+
+        return data || [];
+      },
     },
 
     Service: {
@@ -67,7 +76,19 @@ export const base44 = {
         const { data: result, error } =
           await supabase
             .from('services')
-            .insert([data])
+            .insert([
+              {
+                name: data.name,
+                description:
+                  data.description || '',
+                project_id:
+                  data.project_id,
+                price:
+                  data.base_price || 0,
+                quantity:
+                  data.base_quantity || 0,
+              },
+            ])
             .select()
             .single();
 
@@ -80,7 +101,15 @@ export const base44 = {
         const { data: result, error } =
           await supabase
             .from('services')
-            .update(data)
+            .update({
+              name: data.name,
+              description:
+                data.description || '',
+              price:
+                data.base_price || 0,
+              quantity:
+                data.base_quantity || 0,
+            })
             .eq('id', id)
             .select()
             .single();
@@ -113,7 +142,25 @@ export const base44 = {
         return data || [];
       },
 
-      filter: async () => [],
+      filter: async (filters) => {
+        let query = supabase
+          .from('services')
+          .select('*');
+
+        if (filters?.project_id) {
+          query = query.eq(
+            'project_id',
+            filters.project_id
+          );
+        }
+
+        const { data, error } =
+          await query;
+
+        if (error) throw error;
+
+        return data || [];
+      },
     },
 
     Cost: {
@@ -121,7 +168,15 @@ export const base44 = {
         const { data: result, error } =
           await supabase
             .from('costs')
-            .insert([data])
+            .insert([
+              {
+                name: data.name,
+                amount:
+                  data.base_amount || 0,
+                project_id:
+                  data.project_id,
+              },
+            ])
             .select()
             .single();
 
@@ -134,7 +189,11 @@ export const base44 = {
         const { data: result, error } =
           await supabase
             .from('costs')
-            .update(data)
+            .update({
+              name: data.name,
+              amount:
+                data.base_amount || 0,
+            })
             .eq('id', id)
             .select()
             .single();
@@ -167,7 +226,25 @@ export const base44 = {
         return data || [];
       },
 
-      filter: async () => [],
+      filter: async (filters) => {
+        let query = supabase
+          .from('costs')
+          .select('*');
+
+        if (filters?.project_id) {
+          query = query.eq(
+            'project_id',
+            filters.project_id
+          );
+        }
+
+        const { data, error } =
+          await query;
+
+        if (error) throw error;
+
+        return data || [];
+      },
     },
 
     IncomeSharing: {
@@ -221,7 +298,16 @@ export const base44 = {
         return data || [];
       },
 
-      filter: async () => [],
+      filter: async () => {
+        const { data, error } =
+          await supabase
+            .from('income_sharing')
+            .select('*');
+
+        if (error) throw error;
+
+        return data || [];
+      },
     },
   },
 };
