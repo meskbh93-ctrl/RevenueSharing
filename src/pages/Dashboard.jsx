@@ -62,7 +62,7 @@ function StatCard({
       }}
       transition={{ delay }}
     >
-      <div className="bg-card border border-border rounded-xl p-4">
+      <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
         <p className="text-sm text-muted-foreground mb-2">
           {title}
         </p>
@@ -319,7 +319,13 @@ export default function Dashboard() {
   return (
     <div
       ref={dashboardRef}
-      className="space-y-6 max-w-5xl mx-auto"
+      className="
+        space-y-6
+        max-w-7xl
+        mx-auto
+        relative
+        z-10
+      "
     >
       <div className="flex items-start justify-between">
         <div
@@ -327,8 +333,8 @@ export default function Dashboard() {
             isAr ? 'rtl' : 'ltr'
           }
         >
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <LayoutDashboard className="w-6 h-6" />
+          <h2 className="text-3xl font-bold flex items-center gap-2">
+            <LayoutDashboard className="w-7 h-7" />
 
             {t('dashboard')}
           </h2>
@@ -345,7 +351,7 @@ export default function Dashboard() {
             handleDownloadPDF
           }
           disabled={pdfLoading}
-          className="gap-2"
+          className="gap-2 bg-accent hover:bg-accent/90 text-white"
         >
           <Printer className="w-4 h-4" />
 
@@ -357,7 +363,8 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+
         <StatCard
           title={
             isAr
@@ -406,11 +413,27 @@ export default function Dashboard() {
           )} SAR`}
           delay={0.3}
         />
+
+        <StatCard
+          title={
+            project?.private_partner ||
+            (isAr
+              ? 'الشريك الخاص'
+              : 'Private Partner')
+          }
+          value={`${formatNumber(
+            totalPartner
+          )} SAR`}
+          delay={0.4}
+        />
+
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-card border border-border rounded-xl p-4">
-          <h3 className="font-bold mb-4">
+
+        <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
+
+          <h3 className="font-bold mb-4 text-lg">
             {isAr
               ? 'توزيع الدخل'
               : 'Income Distribution'}
@@ -418,7 +441,7 @@ export default function Dashboard() {
 
           <ResponsiveContainer
             width="100%"
-            height={300}
+            height={320}
           >
             <BarChart
               data={chartData}
@@ -440,6 +463,7 @@ export default function Dashboard() {
                   project?.government_entity ||
                   'Government'
                 }
+                radius={[8, 8, 0, 0]}
               />
 
               <Bar
@@ -449,13 +473,16 @@ export default function Dashboard() {
                   project?.private_partner ||
                   'Partner'
                 }
+                radius={[8, 8, 0, 0]}
               />
             </BarChart>
           </ResponsiveContainer>
+
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-4">
-          <h3 className="font-bold mb-4">
+        <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
+
+          <h3 className="font-bold mb-4 text-lg">
             {isAr
               ? 'النسب الإجمالية'
               : 'Total Split'}
@@ -463,13 +490,16 @@ export default function Dashboard() {
 
           <ResponsiveContainer
             width="100%"
-            height={300}
+            height={320}
           >
             <PieChart>
+
               <Pie
                 data={pieData}
                 dataKey="value"
-                outerRadius={100}
+                innerRadius={60}
+                outerRadius={90}
+                paddingAngle={3}
                 label
               >
                 {pieData.map(
@@ -485,9 +515,12 @@ export default function Dashboard() {
               </Pie>
 
               <Tooltip />
+
             </PieChart>
           </ResponsiveContainer>
+
         </div>
+
       </div>
     </div>
   );
