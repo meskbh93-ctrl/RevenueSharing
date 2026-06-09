@@ -31,7 +31,7 @@ export default function ServiceCard({ service, onEdit, onDelete, index, startYea
             </div>
           </div>
           <p className="text-xs text-muted-foreground text-start">
-            {t('basePrice')}: {formatNumber(service.base_price)} {t('sar')} | {t('baseQuantity')}: {formatNumber(service.base_quantity)}
+           {t('basePrice')}: {formatNumber(service.price)} {t('sar')} | {t('baseQuantity')}: {formatNumber(service.quantity)}
           </p>
         </CardHeader>
         <CardContent>
