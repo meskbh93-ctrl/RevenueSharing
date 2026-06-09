@@ -20,7 +20,9 @@ const navItems = [
 
 export default function Sidebar({ collapsed, onToggle }) {
   const { t, isRTL, toggleLang, lang } = useI18n();
-  const { toggleTheme, isDark } = useTheme();
+  const { toggleTheme, theme } = useTheme();
+
+  const isDark = theme === 'dark';
   const location = useLocation();
 
   const renderNavItem = ({ key, path, icon: Icon }) => {
