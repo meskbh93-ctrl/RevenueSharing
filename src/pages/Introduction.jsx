@@ -99,16 +99,6 @@ export default function Introduction() {
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      if (
-        !base44?.entities?.Project
-          ?.create
-      ) {
-        return {
-          id: Date.now(),
-          ...data,
-        };
-      }
-
       return await base44.entities.Project.create(
         data
       );
@@ -132,16 +122,6 @@ export default function Introduction() {
       id,
       data,
     }) => {
-      if (
-        !base44?.entities?.Project
-          ?.update
-      ) {
-        return {
-          id,
-          ...data,
-        };
-      }
-
       return await base44.entities.Project.update(
         id,
         data
@@ -224,7 +204,7 @@ export default function Introduction() {
 
   return (
     <div
-      className="max-w-3xl mx-auto space-y-6"
+      className="max-w-5xl mx-auto space-y-6"
       dir={isAr ? 'rtl' : 'ltr'}
     >
       <motion.div
@@ -245,7 +225,7 @@ export default function Introduction() {
 
         <p className="text-sm text-muted-foreground text-center">
           {isAr
-            ? 'تحديد تفاصيل المشروع'
+            ? 'تحديد تفاصيل المشروع ونسب تقاسم الدخل'
             : 'Define project details'}
         </p>
       </motion.div>
@@ -352,30 +332,123 @@ export default function Introduction() {
                 />
               </div>
             </div>
-
-            <div className="flex justify-end pt-4">
-              <Button
-                onClick={handleNext}
-                className="bg-accent hover:bg-accent/90 text-white gap-2"
-                disabled={
-                  createMutation.isPending ||
-                  updateMutation.isPending
-                }
-              >
-                {isAr
-                  ? 'التالي'
-                  : 'Next'}
-
-                {isAr ? (
-                  <ArrowLeft className="w-4 h-4" />
-                ) : (
-                  <ArrowRight className="w-4 h-4" />
-                )}
-              </Button>
-            </div>
           </div>
         </div>
       </motion.div>
+
+      <motion.div
+        initial={{
+          opacity: 0,
+          y: 10,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+      >
+        <div className="bg-card border border-border rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <Scale className="w-5 h-5 text-foreground" />
+
+            <h2 className="text-lg font-bold">
+              {isAr
+                ? 'القواعد المنظمة للمشاركة في الدخل'
+                : 'Income Sharing Rules'}
+            </h2>
+          </div>
+
+          <div className="bg-muted/30 rounded-xl p-5 text-sm leading-9 text-center">
+            <p>
+              قرار وزير المالية رقم
+              (1877) وتاريخ
+              24/12/1444هـ
+              بموجب المرسوم الملكي
+              رقم 33 تم السماح
+              للجهات الحكومية
+              بالتعاقد وفق أسلوب
+              المشاركة في الدخل
+              كأحد أساليب التعاقد
+              ضمن نظام المنافسات
+              والمشتريات الحكومية.
+            </p>
+          </div>
+
+          <div className="space-y-4 mt-6 text-sm leading-8">
+            <div>
+              <span className="font-bold text-primary">
+                أولاً:
+              </span>
+              {' '}
+              ألا تتجاوز مدة العقد
+              (خمس) سنوات،
+              وتجوز زيادتها في
+              العقود التي تتطلب
+              طبيعتها ذلك.
+            </div>
+
+            <div>
+              <span className="font-bold text-primary">
+                ثانياً:
+              </span>
+              {' '}
+              يقوم المشغل بالانتفاع
+              من المنصات والأنظمة
+              والأصول ملكيتها
+              للجهة الحكومية.
+            </div>
+
+            <div>
+              <span className="font-bold text-primary">
+                ثالثاً:
+              </span>
+              {' '}
+              ألا يكون مصدر الدخل
+              الناتج عن العقد
+              مدعوماً من الدولة.
+            </div>
+
+            <div>
+              <span className="font-bold text-primary">
+                رابعاً:
+              </span>
+              {' '}
+              ألا يتضمن العقد
+              تقديم الدولة للشريك
+              الخاص أي شكل من أشكال
+              الضمان أو الدعم.
+            </div>
+          </div>
+
+          <div className="border-t border-border mt-6 pt-4 text-sm text-muted-foreground text-center leading-7">
+            على أن يتم التنسيق مع
+            مركز تنمية الإيرادات غير
+            النفطية في مرحلة دراسة
+            الجدوى أو قبل توقيع
+            العقد أو تجديد العقود.
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="flex justify-end pt-2">
+        <Button
+          onClick={handleNext}
+          className="bg-accent hover:bg-accent/90 text-white gap-2"
+          disabled={
+            createMutation.isPending ||
+            updateMutation.isPending
+          }
+        >
+          {isAr
+            ? 'التالي'
+            : 'Next'}
+
+          {isAr ? (
+            <ArrowLeft className="w-4 h-4" />
+          ) : (
+            <ArrowRight className="w-4 h-4" />
+          )}
+        </Button>
+      </div>
     </div>
   );
 }
