@@ -249,60 +249,102 @@ export default function Dashboard() {
     },
   ];
 
-  const handleDownloadPDF =
-    async () => {
-      setPdfLoading(true);
+  const handleDownloadPDF = async () => {
+  setPdfLoading(true);
 
-      try {
-        const canvas =
-          await html2canvas(
-            dashboardRef.current,
-            {
-              scale: 2,
-              useCORS: true,
-            }
-          );
+  try {
+    const element = dashboardRef.current;
 
-        const imgData =
-          canvas.toDataURL(
-            'image/png'
-          );
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#0f172a',
+      scrollY: -window.scrollY,
+    });
 
-        const pdf = new jsPDF(
-          'p',
-          'mm',
-          'a4'
-        );
+    const imgData = canvas.toDataURL(
+      'image/png',
+      1.0
+    );
 
-        const pdfWidth =
-          pdf.internal.pageSize.getWidth();
+    const pdf = new jsPDF({
+      orientation: 'p',
+      unit: 'mm',
+      format: 'a4',
+    });
 
-        const pdfHeight =
-          (canvas.height *
-            pdfWidth) /
-          canvas.width;
+    const pageWidth =
+      pdf.internal.pageSize.getWidth();
 
-        pdf.addImage(
-          imgData,
-          'PNG',
-          0,
-          0,
-          pdfWidth,
-          pdfHeight
-        );
+    const pageHeight =
+      pdf.internal.pageSize.getHeight();
 
-        pdf.save(
-          `dashboard-${
-            project?.name ||
-            'report'
-          }.pdf`
-        );
-      } catch (error) {
-        console.error(error);
-      }
+    const imgWidth = pageWidth;
 
-      setPdfLoading(false);
-    };
+    const imgHeight =
+      (canvas.height * imgWidth) /
+      canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    pdf.setFillColor(15, 23, 42);
+    pdf.rect(
+      0,
+      0,
+      pageWidth,
+      pageHeight,
+      'F'
+    );
+
+    pdf.addImage(
+      imgData,
+      'PNG',
+      0,
+      position,
+      imgWidth,
+      imgHeight
+    );
+
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      position = heightLeft - imgHeight;
+
+      pdf.addPage();
+
+      pdf.setFillColor(15, 23, 42);
+
+      pdf.rect(
+        0,
+        0,
+        pageWidth,
+        pageHeight,
+        'F'
+      );
+
+      pdf.addImage(
+        imgData,
+        'PNG',
+        0,
+        position,
+        imgWidth,
+        imgHeight
+      );
+
+      heightLeft -= pageHeight;
+    }
+
+    pdf.save(
+      `${project?.name || 'report'}-dashboard.pdf`
+    );
+
+  } catch (error) {
+    console.error(error);
+  }
+
+  setPdfLoading(false);
+};
 
   if (!selectedProjectId) {
     return (
