@@ -82,6 +82,7 @@ function StatCard({
 }
 
 export default function Dashboard() {
+
   const { t, lang } =
     useI18n();
 
@@ -108,8 +109,7 @@ export default function Dashboard() {
         (list) =>
           list.find(
             (p) =>
-              p.id ===
-              selectedProjectId
+              p.id === selectedProjectId
           )
       ),
 
@@ -224,7 +224,8 @@ export default function Dashboard() {
       government:
         d.governmentAmount,
 
-      partner: d.partnerAmount,
+      partner:
+        d.partnerAmount,
     }));
 
   const pieData = [
@@ -249,111 +250,145 @@ export default function Dashboard() {
     },
   ];
 
-  const handleDownloadPDF = async () => {
-  setPdfLoading(true);
+  const handleDownloadPDF =
+    async () => {
 
-  try {
-    const element = dashboardRef.current;
+      setPdfLoading(true);
 
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#0f172a',
-      scrollY: -window.scrollY,
-    });
+      try {
 
-    const imgData = canvas.toDataURL(
-      'image/png',
-      1.0
-    );
+        const element =
+          dashboardRef.current;
 
-    const pdf = new jsPDF({
-      orientation: 'p',
-      unit: 'mm',
-      format: 'a4',
-    });
+        const canvas =
+          await html2canvas(
+            element,
+            {
+              scale: 2,
+              useCORS: true,
+              backgroundColor:
+                '#0f172a',
+              scrollY:
+                -window.scrollY,
+            }
+          );
 
-    const pageWidth =
-      pdf.internal.pageSize.getWidth();
+        const imgData =
+          canvas.toDataURL(
+            'image/png',
+            1.0
+          );
 
-    const pageHeight =
-      pdf.internal.pageSize.getHeight();
+        const pdf = new jsPDF({
+          orientation: 'p',
+          unit: 'mm',
+          format: 'a4',
+        });
 
-    const imgWidth = pageWidth;
+        const pageWidth =
+          pdf.internal.pageSize.getWidth();
 
-    const imgHeight =
-      (canvas.height * imgWidth) /
-      canvas.width;
+        const pageHeight =
+          pdf.internal.pageSize.getHeight();
 
-    let heightLeft = imgHeight;
-    let position = 0;
+        const imgWidth =
+          pageWidth;
 
-    pdf.setFillColor(15, 23, 42);
-    pdf.rect(
-      0,
-      0,
-      pageWidth,
-      pageHeight,
-      'F'
-    );
+        const imgHeight =
+          (canvas.height *
+            imgWidth) /
+          canvas.width;
 
-    pdf.addImage(
-      imgData,
-      'PNG',
-      0,
-      position,
-      imgWidth,
-      imgHeight
-    );
+        let heightLeft =
+          imgHeight;
 
-    heightLeft -= pageHeight;
+        let position = 0;
 
-    while (heightLeft > 0) {
-      position = heightLeft - imgHeight;
+        pdf.setFillColor(
+          15,
+          23,
+          42
+        );
 
-      pdf.addPage();
+        pdf.rect(
+          0,
+          0,
+          pageWidth,
+          pageHeight,
+          'F'
+        );
 
-      pdf.setFillColor(15, 23, 42);
+        pdf.addImage(
+          imgData,
+          'PNG',
+          0,
+          position,
+          imgWidth,
+          imgHeight
+        );
 
-      pdf.rect(
-        0,
-        0,
-        pageWidth,
-        pageHeight,
-        'F'
-      );
+        heightLeft -= pageHeight;
 
-      pdf.addImage(
-        imgData,
-        'PNG',
-        0,
-        position,
-        imgWidth,
-        imgHeight
-      );
+        while (
+          heightLeft > 0
+        ) {
 
-      heightLeft -= pageHeight;
-    }
+          position =
+            heightLeft -
+            imgHeight;
 
-    pdf.save(
-      `${project?.name || 'report'}-dashboard.pdf`
-    );
+          pdf.addPage();
 
-  } catch (error) {
-    console.error(error);
-  }
+          pdf.setFillColor(
+            15,
+            23,
+            42
+          );
 
-  setPdfLoading(false);
-};
+          pdf.rect(
+            0,
+            0,
+            pageWidth,
+            pageHeight,
+            'F'
+          );
+
+          pdf.addImage(
+            imgData,
+            'PNG',
+            0,
+            position,
+            imgWidth,
+            imgHeight
+          );
+
+          heightLeft -=
+            pageHeight;
+        }
+
+        pdf.save(
+          `${project?.name || 'report'}-dashboard.pdf`
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
+      setPdfLoading(false);
+    };
 
   if (!selectedProjectId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[40vh] text-muted-foreground">
+
         <LayoutDashboard className="w-12 h-12 mb-3 opacity-30" />
 
         <p>
           {t('selectProject')}
         </p>
+
       </div>
     );
   }
@@ -369,16 +404,20 @@ export default function Dashboard() {
         z-10
       "
     >
+
       <div className="flex items-start justify-between">
+
         <div
           dir={
             isAr ? 'rtl' : 'ltr'
           }
         >
           <h2 className="text-3xl font-bold flex items-center gap-2">
+
             <LayoutDashboard className="w-7 h-7" />
 
             {t('dashboard')}
+
           </h2>
 
           <p className="text-sm text-muted-foreground mt-1">
@@ -386,6 +425,7 @@ export default function Dashboard() {
               ? 'لوحة التحكم والتحليلات'
               : 'Dashboard & Analytics'}
           </p>
+
         </div>
 
         <Button
@@ -395,6 +435,7 @@ export default function Dashboard() {
           disabled={pdfLoading}
           className="gap-2 bg-accent hover:bg-accent/90 text-white"
         >
+
           <Printer className="w-4 h-4" />
 
           {pdfLoading
@@ -402,7 +443,9 @@ export default function Dashboard() {
             : isAr
             ? 'تصدير PDF'
             : 'Export PDF'}
+
         </Button>
+
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -413,9 +456,7 @@ export default function Dashboard() {
               ? 'الإيرادات'
               : 'Revenue'
           }
-          value={`${formatNumber(
-            totalRev
-          )} SAR`}
+          value={`${formatNumber(totalRev)} SAR`}
           delay={0}
         />
 
@@ -425,9 +466,7 @@ export default function Dashboard() {
               ? 'التكاليف'
               : 'Costs'
           }
-          value={`${formatNumber(
-            totalCost
-          )} SAR`}
+          value={`${formatNumber(totalCost)} SAR`}
           delay={0.1}
         />
 
@@ -437,9 +476,7 @@ export default function Dashboard() {
               ? 'صافي الدخل'
               : 'Net Income'
           }
-          value={`${formatNumber(
-            totalNet
-          )} SAR`}
+          value={`${formatNumber(totalNet)} SAR`}
           delay={0.2}
         />
 
@@ -450,9 +487,7 @@ export default function Dashboard() {
               ? 'الجهة الحكومية'
               : 'Government Share')
           }
-          value={`${formatNumber(
-            totalGov
-          )} SAR`}
+          value={`${formatNumber(totalGov)} SAR`}
           delay={0.3}
         />
 
@@ -463,9 +498,7 @@ export default function Dashboard() {
               ? 'الشريك الخاص'
               : 'Private Partner')
           }
-          value={`${formatNumber(
-            totalPartner
-          )} SAR`}
+          value={`${formatNumber(totalPartner)} SAR`}
           delay={0.4}
         />
 
@@ -485,9 +518,11 @@ export default function Dashboard() {
             width="100%"
             height={320}
           >
+
             <BarChart
               data={chartData}
             >
+
               <CartesianGrid strokeDasharray="3 3" />
 
               <XAxis dataKey="year" />
@@ -517,7 +552,9 @@ export default function Dashboard() {
                 }
                 radius={[8, 8, 0, 0]}
               />
+
             </BarChart>
+
           </ResponsiveContainer>
 
         </div>
@@ -534,6 +571,7 @@ export default function Dashboard() {
             width="100%"
             height={320}
           >
+
             <PieChart>
 
               <Pie
@@ -544,6 +582,7 @@ export default function Dashboard() {
                 paddingAngle={3}
                 label
               >
+
                 {pieData.map(
                   (entry, index) => (
                     <Cell
@@ -554,16 +593,19 @@ export default function Dashboard() {
                     />
                   )
                 )}
+
               </Pie>
 
               <Tooltip />
 
             </PieChart>
+
           </ResponsiveContainer>
 
         </div>
 
       </div>
+
     </div>
   );
 }
