@@ -154,8 +154,44 @@ export default function Costs() {
       0
     );
 
+  const operationalCosts =
+    costs
+      .filter(
+        (c) =>
+          c.type ===
+          'operational'
+      )
+      .reduce(
+        (s, c) =>
+          s + (c.amount || 0),
+        0
+      );
+
+  const capitalCosts =
+    costs
+      .filter(
+        (c) =>
+          c.type ===
+          'capital'
+      )
+      .reduce(
+        (s, c) =>
+          s + (c.amount || 0),
+        0
+      );
+
+  const years = [
+    2027,
+    2028,
+    2029,
+    2030,
+    2031,
+  ];
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
+
+      {/* Header */}
 
       <div className="flex items-start justify-between">
 
@@ -173,7 +209,7 @@ export default function Costs() {
 
           <p className="text-sm text-muted-foreground mt-1">
             {isAr
-              ? 'إدارة التكاليف'
+              ? 'إدارة التكاليف مع نسب النمو السنوية'
               : 'Manage project costs'}
           </p>
 
@@ -205,7 +241,7 @@ export default function Costs() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-        <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
+        <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-6 shadow-sm">
 
           <p className="text-sm text-muted-foreground mb-2">
             {isAr
@@ -213,116 +249,205 @@ export default function Costs() {
               : 'Total Costs'}
           </p>
 
-          <h3 className="text-3xl font-bold">
+          <h3 className="text-4xl font-bold">
             {formatNumber(
               totalCosts
             )}{' '}
-            SAR
+            ريال
           </h3>
 
         </div>
 
-        <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-6 shadow-sm">
 
-          <p className="text-sm text-muted-foreground mb-2">
+          <p className="text-sm text-yellow-400 mb-2">
             {isAr
-              ? 'عدد البنود'
-              : 'Cost Entries'}
+              ? 'التكاليف الرأسمالية'
+              : 'Capital Costs'}
           </p>
 
-          <h3 className="text-3xl font-bold text-primary">
-            {costs.length}
-          </h3>
-
-        </div>
-
-        <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
-
-          <p className="text-sm text-muted-foreground mb-2">
-            {isAr
-              ? 'متوسط التكلفة'
-              : 'Average Cost'}
-          </p>
-
-          <h3 className="text-3xl font-bold text-accent">
+          <h3 className="text-4xl font-bold text-yellow-400">
             {formatNumber(
-              costs.length
-                ? totalCosts /
-                    costs.length
-                : 0
+              capitalCosts
             )}{' '}
-            SAR
+            ريال
+          </h3>
+
+        </div>
+
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-6 shadow-sm">
+
+          <p className="text-sm text-blue-400 mb-2">
+            {isAr
+              ? 'التكاليف التشغيلية'
+              : 'Operational Costs'}
+          </p>
+
+          <h3 className="text-4xl font-bold text-blue-400">
+            {formatNumber(
+              operationalCosts
+            )}{' '}
+            ريال
           </h3>
 
         </div>
 
       </div>
 
-      {/* Cost Cards */}
+      {/* Costs Table */}
 
-      <div className="grid gap-4">
+      <div className="bg-card/90 backdrop-blur border border-border rounded-2xl overflow-hidden">
 
-        {costs.map((cost) => (
-          <div
-            key={cost.id}
-            className="
-              bg-card/90
-              backdrop-blur
-              border
-              border-border
-              rounded-2xl
-              p-5
-              shadow-sm
-            "
-          >
+        <div className="px-6 py-5 border-b border-border">
 
-            <div className="flex items-center justify-between">
+          <h3 className="text-xl font-bold">
+            {isAr
+              ? `بنود التكاليف (${costs.length})`
+              : `Cost Items (${costs.length})`}
+          </h3>
 
-              <div>
+        </div>
 
-                <h3 className="font-bold text-lg">
-                  {cost.name}
-                </h3>
+        <div className="overflow-x-auto">
 
-                <p className="text-sm text-muted-foreground mt-1">
-                  {formatNumber(
-                    cost.amount || 0
-                  )}{' '}
-                  SAR
-                </p>
+          <table className="w-full">
 
-              </div>
+            <thead className="bg-muted/20">
 
-              <div className="flex gap-2">
+              <tr className="text-sm text-muted-foreground">
 
-                <Button
-                  size="icon"
-                  variant="outline"
-                  onClick={() =>
-                    setEditingCost(cost)
-                  }
+                <th className="p-4 text-center">
+                  {isAr ? 'الاسم' : 'Name'}
+                </th>
+
+                <th className="p-4 text-center">
+                  {isAr ? 'النوع' : 'Type'}
+                </th>
+
+                {years.map((year) => (
+                  <th
+                    key={year}
+                    className="p-4 text-center"
+                  >
+                    {year}
+                  </th>
+                ))}
+
+                <th className="p-4 text-center">
+                  {isAr ? 'إجراءات' : 'Actions'}
+                </th>
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              {costs.map((cost) => (
+
+                <tr
+                  key={cost.id}
+                  className="
+                    border-t
+                    border-border
+                    text-sm
+                  "
                 >
-                  <Pencil className="w-4 h-4" />
-                </Button>
 
-                <Button
-                  size="icon"
-                  variant="destructive"
-                  onClick={() =>
-                    deleteMutation.mutate(
-                      cost.id
-                    )
-                  }
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                  <td className="p-4 text-center font-semibold">
+                    {cost.name}
+                  </td>
 
-              </div>
+                  <td className="p-4 text-center">
 
-            </div>
+                    <span
+                      className={`
+                        px-3
+                        py-1
+                        rounded-full
+                        text-xs
+                        font-medium
+                        ${
+                          cost.type ===
+                          'capital'
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-blue-500/20 text-blue-400'
+                        }
+                      `}
+                    >
+                      {cost.type ===
+                      'capital'
+                        ? isAr
+                          ? 'رأسمالية'
+                          : 'Capital'
+                        : isAr
+                        ? 'تشغيلية'
+                        : 'Operational'}
+                    </span>
 
-          </div>
-        ))}
+                  </td>
+
+                  {years.map((year) => (
+
+                    <td
+                      key={year}
+                      className="p-4 text-center"
+                    >
+
+                      <div className="font-bold">
+                        {formatNumber(
+                          cost.amount || 0
+                        )}
+                      </div>
+
+                      <div className="text-xs text-muted-foreground">
+                        +0%
+                      </div>
+
+                    </td>
+
+                  ))}
+
+                  <td className="p-4">
+
+                    <div className="flex justify-center gap-2">
+
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() =>
+                          setEditingCost(cost)
+                        }
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="text-red-500"
+                        onClick={() =>
+                          deleteMutation.mutate(
+                            cost.id
+                          )
+                        }
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              ))}
+
+            </tbody>
+
+          </table>
+
+        </div>
 
       </div>
 
