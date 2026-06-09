@@ -99,80 +99,225 @@ export default function Services() {
     );
   }
 
-  return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex items-start justify-between">
-        <div dir={isAr ? 'rtl' : 'ltr'} className="text-start">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Package className="w-6 h-6" />
-            {t('services')}
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {lang === 'ar' ? 'إدارة الخدمات والإيرادات' : 'Manage services and revenues'}
-          </p>
-        </div>
+ return (
+  <div className="space-y-6 max-w-7xl mx-auto">
 
-        <Button
-          onClick={() => setFormOpen(true)}
-          className="bg-accent hover:bg-accent/90 text-white gap-1.5"
-        >
-          <Plus className="w-4 h-4" />
-          {isAr ? 'إضافة خدمة' : 'Add Service'}
-        </Button>
-      </div>
+    <div className="flex items-start justify-between">
 
-      <div className="grid gap-4">
-        {services.map((service) => (
-          <ServiceCard
-            key={service.id}
-            service={service}
-            startYear={startYear}
-            onEdit={() => setEditingService(service)}
-            onDelete={() => deleteMutation.mutate(service.id)}
-          />
-        ))}
-      </div>
+      <div
+        dir={isAr ? 'rtl' : 'ltr'}
+        className="text-start"
+      >
+        <h2 className="text-3xl font-bold flex items-center gap-2">
+          <Package className="w-7 h-7" />
+          {t('services')}
+        </h2>
 
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <TrendingUp className="w-5 h-5 text-primary" />
-          <h3 className="font-bold">
-            {isAr ? 'إجمالي الإيرادات' : 'Total Revenue'}
-          </h3>
-        </div>
-        <p className="text-2xl font-bold text-primary">
-         {formatNumber(calculateTotalRevenue(services).reduce((s, r) => s + r.revenue, 0))} SAR
+        <p className="text-sm text-muted-foreground mt-1">
+          {lang === 'ar'
+            ? 'إدارة الخدمات والإيرادات'
+            : 'Manage services and revenues'}
         </p>
       </div>
 
-      <div className="flex justify-between pt-2">
-        <Button
-          variant="outline"
-          onClick={() => navigate('/introduction')}
-          className="gap-2"
-        >
-          {isAr ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
-          {isAr ? 'رجوع' : 'Back'}
-        </Button>
+      <Button
+        onClick={() => setFormOpen(true)}
+        className="
+          bg-accent
+          hover:bg-accent/90
+          text-white
+          gap-2
+        "
+      >
+        <Plus className="w-4 h-4" />
 
-        <Button onClick={() => navigate('/costs')} className="gap-2">
-          {isAr ? 'التالي' : 'Next'}
-          {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-        </Button>
+        {isAr
+          ? 'إضافة خدمة'
+          : 'Add Service'}
+      </Button>
+
+    </div>
+
+    {/* Revenue Summary */}
+
+    <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-6 shadow-sm">
+
+      <div className="flex items-center gap-3 mb-4">
+
+        <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+          <TrendingUp className="w-6 h-6 text-primary" />
+        </div>
+
+        <div>
+          <p className="text-sm text-muted-foreground">
+            {isAr
+              ? 'إجمالي الإيرادات'
+              : 'Total Revenue'}
+          </p>
+
+          <h3 className="text-3xl font-bold text-primary">
+            {formatNumber(
+              calculateTotalRevenue(services).reduce(
+                (s, r) => s + r.revenue,
+                0
+              )
+            )}{' '}
+            SAR
+          </h3>
+        </div>
+
       </div>
 
-      <ServiceForm
-        open={formOpen}
-        onClose={() => setFormOpen(false)}
-        onSave={(data) => createMutation.mutate(data)}
-      />
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-5">
 
-      <ServiceForm
-        open={!!editingService}
-        onClose={() => setEditingService(null)}
-        initialData={editingService}
-        onSave={(data) => updateMutation.mutate({ id: editingService.id, data })}
-      />
+        {calculateTotalRevenue(services).map(
+          (item, i) => (
+            <div
+              key={i}
+              className="
+                rounded-xl
+                border
+                border-border
+                bg-background/40
+                p-4
+                text-center
+              "
+            >
+              <p className="text-xs text-muted-foreground mb-1">
+                {startYear + i}
+              </p>
+
+              <p className="text-sm font-bold">
+                {formatNumber(
+                  item.revenue
+                )}
+              </p>
+            </div>
+          )
+        )}
+
+      </div>
+
     </div>
-  );
-}
+
+    {/* Services */}
+
+    <div className="grid gap-4">
+
+      {services.map((service) => (
+        <ServiceCard
+          key={service.id}
+          service={service}
+          startYear={startYear}
+          onEdit={() =>
+            setEditingService(service)
+          }
+          onDelete={() =>
+            deleteMutation.mutate(
+              service.id
+            )
+          }
+        />
+      ))}
+
+    </div>
+
+    {/* Empty State */}
+
+    {services.length === 0 && (
+      <div
+        className="
+          bg-card/90
+          backdrop-blur
+          border
+          border-dashed
+          border-border
+          rounded-2xl
+          p-12
+          text-center
+        "
+      >
+        <Package className="w-14 h-14 mx-auto mb-4 opacity-20" />
+
+        <h3 className="text-lg font-bold mb-2">
+          {isAr
+            ? 'لا توجد خدمات'
+            : 'No Services Yet'}
+        </h3>
+
+        <p className="text-sm text-muted-foreground">
+          {isAr
+            ? 'ابدأ بإضافة أول خدمة للمشروع'
+            : 'Start by adding your first service'}
+        </p>
+      </div>
+    )}
+
+    {/* Navigation */}
+
+    <div className="flex justify-between pt-2">
+
+      <Button
+        variant="outline"
+        onClick={() =>
+          navigate('/introduction')
+        }
+        className="gap-2"
+      >
+        {isAr ? (
+          <ArrowRight className="w-4 h-4" />
+        ) : (
+          <ArrowLeft className="w-4 h-4" />
+        )}
+
+        {isAr ? 'رجوع' : 'Back'}
+      </Button>
+
+      <Button
+        onClick={() =>
+          navigate('/costs')
+        }
+        className="
+          gap-2
+          bg-accent
+          hover:bg-accent/90
+          text-white
+        "
+      >
+        {isAr ? 'التالي' : 'Next'}
+
+        {isAr ? (
+          <ArrowLeft className="w-4 h-4" />
+        ) : (
+          <ArrowRight className="w-4 h-4" />
+        )}
+      </Button>
+
+    </div>
+
+    <ServiceForm
+      open={formOpen}
+      onClose={() =>
+        setFormOpen(false)
+      }
+      onSave={(data) =>
+        createMutation.mutate(data)
+      }
+    />
+
+    <ServiceForm
+      open={!!editingService}
+      onClose={() =>
+        setEditingService(null)
+      }
+      initialData={editingService}
+      onSave={(data) =>
+        updateMutation.mutate({
+          id: editingService.id,
+          data,
+        })
+      }
+    />
+
+  </div>
+);
