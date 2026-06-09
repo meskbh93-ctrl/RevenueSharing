@@ -131,6 +131,7 @@ export default function Costs() {
   if (!selectedProjectId) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[40vh] text-muted-foreground">
+
         <DollarSign className="w-12 h-12 mb-3 opacity-30" />
 
         <p>
@@ -138,6 +139,7 @@ export default function Costs() {
             ? 'اختر مشروعاً أولاً'
             : 'Select a project first'}
         </p>
+
       </div>
     );
   }
@@ -158,12 +160,15 @@ export default function Costs() {
       <div className="flex items-start justify-between">
 
         <div>
+
           <h2 className="text-3xl font-bold flex items-center gap-2">
+
             <DollarSign className="w-7 h-7" />
 
             {isAr
               ? 'التكاليف'
               : 'Costs'}
+
           </h2>
 
           <p className="text-sm text-muted-foreground mt-1">
@@ -171,6 +176,7 @@ export default function Costs() {
               ? 'إدارة التكاليف'
               : 'Manage project costs'}
           </p>
+
         </div>
 
         <Button
@@ -184,11 +190,13 @@ export default function Costs() {
             text-white
           "
         >
+
           <Plus className="w-4 h-4" />
 
           {isAr
             ? 'إضافة تكلفة'
             : 'Add Cost'}
+
         </Button>
 
       </div>
@@ -198,6 +206,7 @@ export default function Costs() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
         <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
+
           <p className="text-sm text-muted-foreground mb-2">
             {isAr
               ? 'إجمالي التكاليف'
@@ -210,9 +219,11 @@ export default function Costs() {
             )}{' '}
             SAR
           </h3>
+
         </div>
 
         <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
+
           <p className="text-sm text-muted-foreground mb-2">
             {isAr
               ? 'عدد البنود'
@@ -222,9 +233,11 @@ export default function Costs() {
           <h3 className="text-3xl font-bold text-primary">
             {costs.length}
           </h3>
+
         </div>
 
         <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
+
           <p className="text-sm text-muted-foreground mb-2">
             {isAr
               ? 'متوسط التكلفة'
@@ -240,6 +253,7 @@ export default function Costs() {
             )}{' '}
             SAR
           </h3>
+
         </div>
 
       </div>
@@ -261,9 +275,11 @@ export default function Costs() {
               shadow-sm
             "
           >
+
             <div className="flex items-center justify-between">
 
               <div>
+
                 <h3 className="font-bold text-lg">
                   {cost.name}
                 </h3>
@@ -274,6 +290,7 @@ export default function Costs() {
                   )}{' '}
                   SAR
                 </p>
+
               </div>
 
               <div className="flex gap-2">
@@ -303,10 +320,44 @@ export default function Costs() {
               </div>
 
             </div>
+
           </div>
         ))}
 
       </div>
+
+      {/* Empty State */}
+
+      {costs.length === 0 && (
+        <div
+          className="
+            bg-card/90
+            backdrop-blur
+            border
+            border-dashed
+            border-border
+            rounded-2xl
+            p-12
+            text-center
+          "
+        >
+
+          <DollarSign className="w-14 h-14 mx-auto mb-4 opacity-20" />
+
+          <h3 className="text-lg font-bold mb-2">
+            {isAr
+              ? 'لا توجد تكاليف'
+              : 'No Costs Yet'}
+          </h3>
+
+          <p className="text-sm text-muted-foreground">
+            {isAr
+              ? 'ابدأ بإضافة أول تكلفة للمشروع'
+              : 'Start by adding your first cost'}
+          </p>
+
+        </div>
+      )}
 
       {/* Navigation */}
 
@@ -319,6 +370,7 @@ export default function Costs() {
           }
           className="gap-2"
         >
+
           {isAr ? (
             <ArrowRight className="w-4 h-4" />
           ) : (
@@ -328,6 +380,7 @@ export default function Costs() {
           {isAr
             ? 'رجوع'
             : 'Back'}
+
         </Button>
 
         <Button
@@ -343,6 +396,7 @@ export default function Costs() {
             text-white
           "
         >
+
           {isAr
             ? 'التالي'
             : 'Next'}
@@ -352,6 +406,7 @@ export default function Costs() {
           ) : (
             <ArrowRight className="w-4 h-4" />
           )}
+
         </Button>
 
       </div>
