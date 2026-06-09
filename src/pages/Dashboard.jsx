@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 
 import {
   LayoutDashboard,
-  DollarSign,
   Printer,
 } from 'lucide-react';
 
@@ -83,7 +82,8 @@ function StatCard({
 }
 
 export default function Dashboard() {
-  const { t, lang } = useI18n();
+  const { t, lang } =
+    useI18n();
 
   const {
     selectedProjectId,
@@ -108,7 +108,8 @@ export default function Dashboard() {
         (list) =>
           list.find(
             (p) =>
-              p.id === selectedProjectId
+              p.id ===
+              selectedProjectId
           )
       ),
 
@@ -184,15 +185,17 @@ export default function Dashboard() {
       sharing
     );
 
-  const totalRev = revenueData.reduce(
-    (s, r) => s + r.revenue,
-    0
-  );
+  const totalRev =
+    revenueData.reduce(
+      (s, r) => s + r.revenue,
+      0
+    );
 
-  const totalCost = costData.reduce(
-    (s, c) => s + c.total,
-    0
-  );
+  const totalCost =
+    costData.reduce(
+      (s, c) => s + c.total,
+      0
+    );
 
   const totalNet =
     totalRev - totalCost;
@@ -211,8 +214,8 @@ export default function Dashboard() {
       0
     );
 
-  const chartData = distribution.map(
-    (d, i) => ({
+  const chartData =
+    distribution.map((d, i) => ({
       year:
         new Date().getFullYear() +
         i +
@@ -222,22 +225,25 @@ export default function Dashboard() {
         d.governmentAmount,
 
       partner: d.partnerAmount,
-    })
-  );
+    }));
 
   const pieData = [
     {
-      name: isAr
-        ? 'الحكومة'
-        : 'Government',
+      name:
+        project?.government_entity ||
+        (isAr
+          ? 'الجهة الحكومية'
+          : 'Government'),
 
       value: totalGov,
     },
 
     {
-      name: isAr
-        ? 'الشريك'
-        : 'Partner',
+      name:
+        project?.private_partner ||
+        (isAr
+          ? 'الشريك الخاص'
+          : 'Private Partner'),
 
       value: totalPartner,
     },
@@ -303,7 +309,9 @@ export default function Dashboard() {
       <div className="flex flex-col items-center justify-center min-h-[40vh] text-muted-foreground">
         <LayoutDashboard className="w-12 h-12 mb-3 opacity-30" />
 
-        <p>{t('selectProject')}</p>
+        <p>
+          {t('selectProject')}
+        </p>
       </div>
     );
   }
@@ -315,7 +323,9 @@ export default function Dashboard() {
     >
       <div className="flex items-start justify-between">
         <div
-          dir={isAr ? 'rtl' : 'ltr'}
+          dir={
+            isAr ? 'rtl' : 'ltr'
+          }
         >
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <LayoutDashboard className="w-6 h-6" />
@@ -386,9 +396,10 @@ export default function Dashboard() {
 
         <StatCard
           title={
-            isAr
-              ? 'حصة الحكومة'
-              : 'Government Share'
+            project?.government_entity ||
+            (isAr
+              ? 'الجهة الحكومية'
+              : 'Government Share')
           }
           value={`${formatNumber(
             totalGov
@@ -425,11 +436,19 @@ export default function Dashboard() {
               <Bar
                 dataKey="government"
                 fill={COLORS[0]}
+                name={
+                  project?.government_entity ||
+                  'Government'
+                }
               />
 
               <Bar
                 dataKey="partner"
                 fill={COLORS[1]}
+                name={
+                  project?.private_partner ||
+                  'Partner'
+                }
               />
             </BarChart>
           </ResponsiveContainer>
