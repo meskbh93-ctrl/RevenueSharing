@@ -30,7 +30,6 @@ export default function AppLayout() {
       "
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
           className="
@@ -59,7 +58,6 @@ export default function AppLayout() {
         />
       </div>
 
-      {/* Sidebar */}
       <Sidebar
         collapsed={collapsed}
         onToggle={() =>
@@ -67,7 +65,6 @@ export default function AppLayout() {
         }
       />
 
-      {/* Main Content */}
       <main
         className={cn(
           `
@@ -91,7 +88,6 @@ export default function AppLayout() {
         </div>
       </main>
 
-      {/* Floating Chat Button */}
       <motion.button
         initial={{
           scale: 0,
