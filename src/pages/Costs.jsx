@@ -322,7 +322,8 @@ export default function Costs() {
       }
     />
 
-    <CostForm
+    
+<CostForm
       open={!!editingCost}
       onClose={() =>
         setEditingCost(null)
@@ -338,3 +339,4 @@ export default function Costs() {
 
   </div>
 );
+}
