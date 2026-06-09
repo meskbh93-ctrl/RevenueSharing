@@ -244,174 +244,407 @@ export default function IncomeSharing() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+  <div className="space-y-6 max-w-7xl mx-auto">
 
+    <div
+      dir={lang === 'ar' ? 'rtl' : 'ltr'}
+      className="text-start"
+    >
+      <h2 className="text-3xl font-bold flex items-center gap-2">
+        <Clock className="w-7 h-7" />
+        Revenue Sharing
+      </h2>
+
+      <p className="text-sm text-muted-foreground mt-1">
+        {lang === 'ar'
+          ? 'توزيع الدخل بين الحكومة والشريك الخاص على مدار 5 سنوات'
+          : 'Distribute income between government and private partner over 5 years'}
+      </p>
+    </div>
+
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <div
+        className="bg-card/90 backdrop-blur border border-border rounded-2xl p-6 shadow-sm"
         dir={lang === 'ar' ? 'rtl' : 'ltr'}
-        className="text-start"
       >
-        <h2 className="text-2xl font-bold flex items-center gap-2">
-          <Clock className="w-6 h-6" />
-          Revenue Sharing
-        </h2>
+        <div className="flex items-center justify-between mb-5">
 
-        <p className="text-sm text-muted-foreground mt-1">
-          {lang === 'ar'
-            ? 'توزيع الدخل بين الحكومة والشريك الخاص على مدار 5 سنوات'
-            : 'Distribute income between government and private partner over 5 years'}
-        </p>
-      </div>
+          <span className="text-base font-bold">
+            {isAr
+              ? 'توزيع الدخل'
+              : 'Income Distribution'}
+          </span>
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <div
-          className="bg-card border border-border rounded-xl p-5"
-          dir={lang === 'ar' ? 'rtl' : 'ltr'}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-bold">
-              {isAr ? 'توزيع الدخل' : 'Income Distribution'}
+          <div className="flex items-center gap-2">
+            <Label className="text-sm">
+              {isAr
+                ? 'نسبة موحدة لجميع السنوات'
+                : 'Uniform Rate'}
+            </Label>
+
+            <Switch
+              checked={uniform}
+              onCheckedChange={toggleUniform}
+            />
+          </div>
+        </div>
+
+        {(uniform ? [0] : [0, 1, 2, 3, 4]).map(i => (
+          <div
+            key={i}
+            className="
+              flex
+              flex-wrap
+              items-center
+              gap-4
+              mb-3
+              pb-3
+              border-b
+              border-border/50
+              last:border-0
+            "
+          >
+            <span className="text-sm font-bold w-20">
+              {yearLabels[i]}
             </span>
 
             <div className="flex items-center gap-2">
-              <Label className="text-sm">
-                {isAr
-                  ? 'نسبة موحدة لجميع السنوات'
-                  : 'Uniform Rate for All Years'}
-              </Label>
 
-              <Switch
-                checked={uniform}
-                onCheckedChange={toggleUniform}
+              <Input
+                type="text"
+                inputMode="decimal"
+                value={govShares[i]}
+                onChange={e =>
+                  handleGovShareChange(
+                    i,
+                    e.target.value
+                  )
+                }
+                className="h-10 text-center w-28"
               />
-            </div>
-          </div>
 
-          {(uniform ? [0] : [0, 1, 2, 3, 4]).map(i => (
-            <div
-              key={i}
-              className="flex flex-wrap items-center gap-4 mb-3 pb-3 border-b border-border/50 last:border-0 last:mb-0 last:pb-0"
-            >
-              <span className="text-sm font-medium w-16 text-start">
-                {yearLabels[i]}
+              <span className="text-xs text-muted-foreground">
+                {project?.government_entity ||
+                  'Government'} %
               </span>
 
-              <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  inputMode="decimal"
-                  value={govShares[i]}
-                  onChange={e =>
-                    handleGovShareChange(i, e.target.value)
-                  }
-                  className="h-9 text-center w-24"
-                />
-
-                <span className="text-xs text-muted-foreground">
-                  {project?.government_entity ||
-                    (isAr
-                      ? 'الجهة الحكومية'
-                      : 'Government')}{' '}
-                  %
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  value={partnerShares[i]}
-                  disabled
-                  className="h-9 text-center w-24 bg-muted"
-                />
-
-                <span className="text-xs text-muted-foreground">
-                  {project?.private_partner ||
-                    (isAr
-                      ? 'الشريك الخاص'
-                      : 'Private Partner')}{' '}
-                  %
-                </span>
-              </div>
             </div>
-          ))}
 
-          <div className="flex justify-end mt-4 pt-4 border-t border-border">
-            <Button
-              className="bg-accent hover:bg-accent/90 text-white gap-2"
-              onClick={() => {
-                const payload = {
-                  uniform_rate: uniform,
-                  government_shares: govShares,
-                  partner_shares: partnerShares,
-                };
+            <div className="flex items-center gap-2">
 
-                if (sharing) {
-                  updateMutation.mutate({
-                    id: sharing.id,
-                    data: payload,
-                  });
-                } else {
-                  createMutation.mutate(payload);
-                }
-              }}
-            >
-              <Save className="w-4 h-4" />
-              {isAr ? 'حفظ' : 'Save'}
-            </Button>
+              <Input
+                type="text"
+                value={partnerShares[i]}
+                disabled
+                className="h-10 text-center w-28 bg-muted"
+              />
+
+              <span className="text-xs text-muted-foreground">
+                {project?.private_partner ||
+                  'Partner'} %
+              </span>
+
+            </div>
           </div>
+        ))}
+
+        <div className="flex justify-end mt-5 pt-5 border-t border-border">
+
+          <Button
+            className="
+              bg-accent
+              hover:bg-accent/90
+              text-white
+              gap-2
+            "
+            onClick={() => {
+              const payload = {
+                uniform_rate: uniform,
+                government_shares: govShares,
+                partner_shares: partnerShares,
+              };
+
+              if (sharing) {
+                updateMutation.mutate({
+                  id: sharing.id,
+                  data: payload,
+                });
+              } else {
+                createMutation.mutate(payload);
+              }
+            }}
+          >
+            <Save className="w-4 h-4" />
+
+            {isAr ? 'حفظ' : 'Save'}
+          </Button>
+
         </div>
-      </motion.div>
+      </div>
+    </motion.div>
 
-      <div className="grid grid-cols-3 gap-4">
+    {/* Summary Cards */}
 
-        <div className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center text-center">
-          <p className="text-xs text-muted-foreground mb-1">
-            {lang === 'ar'
-              ? 'إجمالي الدخل (5 سنوات)'
-              : 'Total Income (5yr)'}
-          </p>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-          <p className="text-xl font-bold">
-            {formatNumber(
-              distribution.reduce(
-                (s, d) => s + d.netIncome,
-                0
-              )
-            )}{' '}
-            {isAr ? 'ريال' : 'SAR'}
-          </p>
-        </div>
+      <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 text-center shadow-sm">
+        <p className="text-xs text-muted-foreground mb-2">
+          {isAr
+            ? 'إجمالي صافي الدخل'
+            : 'Total Net Income'}
+        </p>
 
-        <div className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center text-center">
-          <p className="text-xs text-muted-foreground mb-1">
-            {project?.government_entity ||
-              (isAr
-                ? 'الجهة الحكومية'
-                : 'Government')}{' '}
-            ({isAr ? '5 سنوات' : '5yr'})
-          </p>
+        <p className="text-2xl font-bold">
+          {formatNumber(
+            distribution.reduce(
+              (s, d) => s + d.netIncome,
+              0
+            )
+          )}{' '}
+          SAR
+        </p>
+      </div>
 
-          <p className="text-xl font-bold text-primary">
-            {formatNumber(totalGov)}{' '}
-            {isAr ? 'ريال' : 'SAR'}
-          </p>
-        </div>
+      <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 text-center shadow-sm">
+        <p className="text-xs text-muted-foreground mb-2">
+          {project?.government_entity ||
+            'Government'}
+        </p>
 
-        <div className="bg-card border border-border rounded-xl p-4 flex flex-col items-center justify-center text-center">
-          <p className="text-xs text-muted-foreground mb-1">
-            {project?.private_partner ||
-              (isAr
-                ? 'الشريك الخاص'
-                : 'Private Partner')}{' '}
-            ({isAr ? '5 سنوات' : '5yr'})
-          </p>
+        <p className="text-2xl font-bold text-primary">
+          {formatNumber(totalGov)} SAR
+        </p>
+      </div>
 
-          <p className="text-xl font-bold text-accent">
-            {formatNumber(totalPartner)}{' '}
-            {isAr ? 'ريال' : 'SAR'}
-          </p>
-        </div>
+      <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 text-center shadow-sm">
+        <p className="text-xs text-muted-foreground mb-2">
+          {project?.private_partner ||
+            'Partner'}
+        </p>
+
+        <p className="text-2xl font-bold text-accent">
+          {formatNumber(totalPartner)} SAR
+        </p>
+      </div>
+
+    </div>
+
+    {/* Charts */}
+
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+      <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
+
+        <h3 className="font-bold text-lg mb-4 text-center">
+          {isAr
+            ? 'التوزيع السنوي'
+            : 'Annual Distribution'}
+        </h3>
+
+        <ResponsiveContainer
+          width="100%"
+          height={320}
+        >
+          <LineChart
+            data={distribution.map((d, i) => ({
+              ...d,
+              yearLabel: yearLabels[i],
+            }))}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              opacity={0.2}
+            />
+
+            <XAxis dataKey="yearLabel" />
+
+            <YAxis />
+
+            <Tooltip />
+
+            <Legend />
+
+            <Line
+              type="monotone"
+              dataKey="governmentAmount"
+              name={
+                project?.government_entity ||
+                'Government'
+              }
+              stroke={COLORS[0]}
+              strokeWidth={3}
+              dot={{ r: 5 }}
+            />
+
+            <Line
+              type="monotone"
+              dataKey="partnerAmount"
+              name={
+                project?.private_partner ||
+                'Partner'
+              }
+              stroke={COLORS[1]}
+              strokeWidth={3}
+              dot={{ r: 5 }}
+            />
+
+          </LineChart>
+        </ResponsiveContainer>
 
       </div>
+
+      <div className="bg-card/90 backdrop-blur border border-border rounded-2xl p-5 shadow-sm">
+
+        <h3 className="font-bold text-lg mb-4 text-center">
+          {isAr
+            ? 'التوزيع الإجمالي'
+            : 'Total Split'}
+        </h3>
+
+        <ResponsiveContainer
+          width="100%"
+          height={320}
+        >
+          <PieChart>
+
+            <Pie
+              data={pieData}
+              dataKey="value"
+              innerRadius={65}
+              outerRadius={95}
+              paddingAngle={4}
+              label
+            >
+              {pieData.map((_, index) => (
+                <Cell
+                  key={index}
+                  fill={COLORS[index]}
+                />
+              ))}
+            </Pie>
+
+            <Tooltip />
+
+          </PieChart>
+        </ResponsiveContainer>
+
+      </div>
+
     </div>
-  );
-}
+
+    {/* Table */}
+
+    <div className="bg-card/90 backdrop-blur border border-border rounded-2xl overflow-hidden shadow-sm">
+
+      <div className="p-5 border-b border-border">
+        <h3 className="font-bold text-center">
+          {isAr
+            ? 'ملخص التوزيع'
+            : 'Distribution Summary'}
+        </h3>
+      </div>
+
+      <div className="overflow-x-auto">
+
+        <Table>
+
+          <TableHeader>
+            <TableRow className="bg-muted/40">
+
+              <TableHead>
+                {t('year')}
+              </TableHead>
+
+              <TableHead>
+                {t('netIncome')}
+              </TableHead>
+
+              <TableHead>
+                {project?.government_entity ||
+                  'Government'}
+              </TableHead>
+
+              <TableHead>
+                {project?.private_partner ||
+                  'Partner'}
+              </TableHead>
+
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+
+            {distribution.map((d, i) => (
+              <TableRow key={i}>
+
+                <TableCell>
+                  {yearLabels[i]}
+                </TableCell>
+
+                <TableCell>
+                  {formatNumber(d.netIncome)}
+                </TableCell>
+
+                <TableCell className="text-primary font-semibold">
+                  {formatNumber(
+                    d.governmentAmount
+                  )}
+                </TableCell>
+
+                <TableCell className="text-accent font-semibold">
+                  {formatNumber(
+                    d.partnerAmount
+                  )}
+                </TableCell>
+
+              </TableRow>
+            ))}
+
+          </TableBody>
+
+        </Table>
+
+      </div>
+
+    </div>
+
+    {/* Navigation */}
+
+    <div className="flex justify-between pt-2">
+
+      <Button
+        variant="outline"
+        onClick={() => navigate('/costs')}
+        className="gap-2"
+      >
+        {isAr ? (
+          <ArrowRight className="w-4 h-4" />
+        ) : (
+          <ArrowLeft className="w-4 h-4" />
+        )}
+
+        {isAr ? 'رجوع' : 'Back'}
+      </Button>
+
+      <Button
+        onClick={() => navigate('/dashboard')}
+        className="
+          gap-2
+          bg-accent
+          hover:bg-accent/90
+          text-white
+        "
+      >
+        {isAr ? 'التالي' : 'Next'}
+
+        {isAr ? (
+          <ArrowLeft className="w-4 h-4" />
+        ) : (
+          <ArrowRight className="w-4 h-4" />
+        )}
+      </Button>
+
+    </div>
+
+  </div>
+);
