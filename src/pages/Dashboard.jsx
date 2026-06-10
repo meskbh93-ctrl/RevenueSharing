@@ -57,6 +57,7 @@ function StatCard({
   icon,
   color,
 }) {
+
   return (
     <div
       className={`
@@ -64,28 +65,29 @@ function StatCard({
         border
         p-5
         shadow-sm
-        backdrop-blur
         ${color}
       `}
     >
 
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between">
 
         <div>
-          <p className="text-sm text-muted-foreground mb-1">
+
+          <p className="text-sm text-slate-500 mb-1">
             {title}
           </p>
 
-          <h3 className="text-2xl font-bold">
+          <h3 className="text-3xl font-bold">
             {value}
           </h3>
 
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-slate-400 mt-2">
             إجمالي 5 سنوات
           </p>
+
         </div>
 
-        <div className="w-11 h-11 rounded-xl bg-black/20 flex items-center justify-center">
+        <div className="w-11 h-11 rounded-xl bg-black/10 flex items-center justify-center">
           {icon}
         </div>
 
@@ -97,7 +99,7 @@ function StatCard({
 
 export default function Dashboard() {
 
-  const { t, lang } =
+  const { lang } =
     useI18n();
 
   const {
@@ -125,7 +127,8 @@ export default function Dashboard() {
           (list) =>
             list.find(
               (p) =>
-                p.id === selectedProjectId
+                p.id ===
+                selectedProjectId
             )
         ),
 
@@ -241,22 +244,17 @@ export default function Dashboard() {
 
   const governmentName =
     project?.government_entity ||
-    (isAr
-      ? 'الجهة الحكومية'
-      : 'Government');
+    'الحكومة';
 
   const partnerName =
     project?.private_partner ||
-    (isAr
-      ? 'الشريك الخاص'
-      : 'Private Partner');
+    'الشريك';
 
   const operationalCosts =
     costs
       .filter(
         (c) =>
-          c.type === 'operational' ||
-          c.type === 'تشغيلية'
+          c.type === 'operational'
       )
       .reduce(
         (s, c) =>
@@ -268,8 +266,7 @@ export default function Dashboard() {
     costs
       .filter(
         (c) =>
-          c.type === 'capital' ||
-          c.type === 'رأسمالية'
+          c.type === 'capital'
       )
       .reduce(
         (s, c) =>
@@ -280,7 +277,8 @@ export default function Dashboard() {
   const chartData =
     distribution.map(
       (d, i) => ({
-        year: 2027 + i,
+        year:
+          2027 + i,
 
         government:
           d.governmentAmount,
@@ -310,13 +308,16 @@ export default function Dashboard() {
 
   const pieData = [
     {
-      name: governmentName,
-      value: totalGov,
+      name:
+        governmentName,
+      value:
+        totalGov,
     },
-
     {
-      name: partnerName,
-      value: totalPartner,
+      name:
+        partnerName,
+      value:
+        totalPartner,
     },
   ];
 
@@ -327,47 +328,94 @@ export default function Dashboard() {
 
       try {
 
+        const element =
+          dashboardRef.current;
+
         const canvas =
           await html2canvas(
-            dashboardRef.current,
+            element,
             {
-              scale: 2,
+              scale: 3,
+              useCORS: true,
               backgroundColor:
-                '#020817',
+                '#ffffff',
             }
           );
 
         const imgData =
           canvas.toDataURL(
-            'image/png'
+            'image/png',
+            1.0
           );
 
         const pdf =
-          new jsPDF(
-            'p',
-            'mm',
-            'a4'
-          );
+          new jsPDF({
+            orientation: 'p',
+            unit: 'mm',
+            format: 'a4',
+          });
 
-        const width =
+        const pageWidth =
           pdf.internal.pageSize.getWidth();
 
-        const height =
+        const pageHeight =
+          pdf.internal.pageSize.getHeight();
+
+        const margin = 5;
+
+        const imgWidth =
+          pageWidth -
+          margin * 2;
+
+        const imgHeight =
           (canvas.height *
-            width) /
+            imgWidth) /
           canvas.width;
+
+        let heightLeft =
+          imgHeight;
+
+        let position =
+          margin;
 
         pdf.addImage(
           imgData,
           'PNG',
-          0,
-          0,
-          width,
-          height
+          margin,
+          position,
+          imgWidth,
+          imgHeight
         );
 
+        heightLeft -=
+          pageHeight;
+
+        while (
+          heightLeft > 0
+        ) {
+
+          position =
+            heightLeft -
+            imgHeight +
+            margin;
+
+          pdf.addPage();
+
+          pdf.addImage(
+            imgData,
+            'PNG',
+            margin,
+            position,
+            imgWidth,
+            imgHeight
+          );
+
+          heightLeft -=
+            pageHeight;
+        }
+
         pdf.save(
-          'dashboard.pdf'
+          'dashboard-report.pdf'
         );
 
       } catch (error) {
@@ -379,53 +427,22 @@ export default function Dashboard() {
       setPdfLoading(false);
     };
 
-  if (!selectedProjectId) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[40vh] text-muted-foreground">
-
-        <LayoutDashboard className="w-12 h-12 mb-3 opacity-30" />
-
-        <p>
-          {t('selectProject')}
-        </p>
-
-      </div>
-    );
-  }
-
   return (
     <div
       ref={dashboardRef}
       className="
+        bg-white
+        text-black
+        p-6
+        space-y-6
         max-w-7xl
         mx-auto
-        space-y-6
       "
     >
 
       {/* Header */}
 
       <div className="flex items-start justify-between">
-
-        <div>
-
-          <h2 className="text-4xl font-bold flex items-center gap-2">
-
-            <LayoutDashboard className="w-8 h-8" />
-
-            {isAr
-              ? 'لوحة البيانات'
-              : 'Dashboard'}
-
-          </h2>
-
-          <p className="text-sm text-muted-foreground mt-2">
-            {isAr
-              ? 'المشاركة في الدخل — نظرة عامة وتحليلات'
-              : 'Revenue sharing analytics'}
-          </p>
-
-        </div>
 
         <Button
           onClick={
@@ -435,20 +452,35 @@ export default function Dashboard() {
             pdfLoading
           }
           className="
+            bg-yellow-400
+            hover:bg-yellow-500
+            text-black
             gap-2
-            bg-accent
-            hover:bg-accent/90
-            text-white
+            font-bold
           "
         >
 
           <Printer className="w-4 h-4" />
 
-          {isAr
-            ? 'طباعة التقرير PDF'
-            : 'Export PDF'}
+          طباعة التقرير PDF
 
         </Button>
+
+        <div className="text-right">
+
+          <h2 className="text-4xl font-black flex items-center gap-2 justify-end">
+
+            <LayoutDashboard className="w-8 h-8" />
+
+            لوحة البيانات
+
+          </h2>
+
+          <p className="text-slate-500 mt-2">
+            المشاركة في الدخل — نظرة عامة وتحليلات
+          </p>
+
+        </div>
 
       </div>
 
@@ -459,55 +491,43 @@ export default function Dashboard() {
         <StatCard
           title="إجمالي الدخل"
           value={`${formatNumber(totalRev)} ريال`}
-          icon={
-            <Coins className="w-5 h-5 text-yellow-300" />
-          }
-          color="bg-card/90 border-border"
+          icon={<Coins className="w-5 h-5 text-yellow-400" />}
+          color="bg-white border-slate-200"
         />
 
         <StatCard
           title={governmentName}
           value={`${formatNumber(totalGov)} ريال`}
-          icon={
-            <Landmark className="w-5 h-5 text-yellow-300" />
-          }
-          color="bg-card/90 border-border"
+          icon={<Landmark className="w-5 h-5 text-yellow-400" />}
+          color="bg-white border-slate-200"
         />
 
         <StatCard
           title={partnerName}
           value={`${formatNumber(totalPartner)} ريال`}
-          icon={
-            <Building2 className="w-5 h-5 text-yellow-300" />
-          }
-          color="bg-card/90 border-border"
+          icon={<Building2 className="w-5 h-5 text-yellow-400" />}
+          color="bg-white border-slate-200"
         />
 
         <StatCard
           title="إجمالي التكاليف"
           value={`${formatNumber(totalCost)} ريال`}
-          icon={
-            <Wallet className="w-5 h-5 text-slate-300" />
-          }
-          color="bg-card/90 border-border"
+          icon={<Wallet className="w-5 h-5 text-slate-500" />}
+          color="bg-white border-slate-200"
         />
 
         <StatCard
           title="التكاليف الرأسمالية"
           value={`${formatNumber(capitalCosts)} ريال`}
-          icon={
-            <TrendingUp className="w-5 h-5 text-yellow-300" />
-          }
-          color="bg-yellow-500/10 border-yellow-500/30"
+          icon={<TrendingUp className="w-5 h-5 text-yellow-400" />}
+          color="bg-yellow-50 border-yellow-200"
         />
 
         <StatCard
           title="التكاليف التشغيلية"
           value={`${formatNumber(operationalCosts)} ريال`}
-          icon={
-            <TrendingDown className="w-5 h-5 text-blue-400" />
-          }
-          color="bg-blue-500/10 border-blue-500/30"
+          icon={<TrendingDown className="w-5 h-5 text-blue-500" />}
+          color="bg-blue-50 border-blue-200"
         />
 
       </div>
@@ -516,24 +536,23 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
-        <div className="bg-card/90 border border-border rounded-2xl p-5">
+        {/* Revenue */}
 
-          <h3 className="font-bold mb-5">
+        <div className="bg-[#0f172a] border border-slate-700 rounded-2xl p-5">
+
+          <h3 className="text-white font-bold mb-5">
             تحليل الإيرادات
           </h3>
 
-          <ResponsiveContainer
-            width="100%"
-            height={280}
-          >
+          <ResponsiveContainer width="100%" height={280}>
 
             <BarChart data={chartData}>
 
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
 
-              <XAxis dataKey="year" />
+              <XAxis dataKey="year" stroke="#94a3b8" />
 
-              <YAxis />
+              <YAxis stroke="#94a3b8" />
 
               <Tooltip />
 
@@ -557,24 +576,23 @@ export default function Dashboard() {
 
         </div>
 
-        <div className="bg-card/90 border border-border rounded-2xl p-5">
+        {/* Costs */}
 
-          <h3 className="font-bold mb-5">
+        <div className="bg-[#0f172a] border border-slate-700 rounded-2xl p-5">
+
+          <h3 className="text-white font-bold mb-5">
             تحليل التكاليف
           </h3>
 
-          <ResponsiveContainer
-            width="100%"
-            height={280}
-          >
+          <ResponsiveContainer width="100%" height={280}>
 
             <BarChart data={chartData}>
 
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
 
-              <XAxis dataKey="year" />
+              <XAxis dataKey="year" stroke="#94a3b8" />
 
-              <YAxis />
+              <YAxis stroke="#94a3b8" />
 
               <Tooltip />
 
@@ -598,182 +616,81 @@ export default function Dashboard() {
 
         </div>
 
-        <div className="bg-card/90 border border-border rounded-2xl p-5">
-
-          <h3 className="font-bold mb-5">
-            توزيع الدخل الإجمالي
-          </h3>
-
-          <ResponsiveContainer
-            width="100%"
-            height={300}
-          >
-
-            <PieChart>
-
-              <Pie
-                data={pieData}
-                dataKey="value"
-                innerRadius={70}
-                outerRadius={110}
-              >
-
-                {pieData.map(
-                  (
-                    entry,
-                    index
-                  ) => (
-                    <Cell
-                      key={index}
-                      fill={
-                        COLORS[index]
-                      }
-                    />
-                  )
-                )}
-
-              </Pie>
-
-              <Tooltip />
-
-            </PieChart>
-
-          </ResponsiveContainer>
-
-        </div>
-
-        <div className="bg-card/90 border border-border rounded-2xl p-5">
-
-          <h3 className="font-bold mb-5">
-            توزيع الدخل
-          </h3>
-
-          <ResponsiveContainer
-            width="100%"
-            height={300}
-          >
-
-            <BarChart data={chartData}>
-
-              <CartesianGrid strokeDasharray="3 3" />
-
-              <XAxis dataKey="year" />
-
-              <YAxis />
-
-              <Tooltip />
-
-              <Legend />
-
-              <Bar
-                dataKey="government"
-                stackId="a"
-                fill="#facc15"
-                name={governmentName}
-              />
-
-              <Bar
-                dataKey="partner"
-                stackId="a"
-                fill="#94a3b8"
-                name={partnerName}
-              />
-
-            </BarChart>
-
-          </ResponsiveContainer>
-
-        </div>
-
       </div>
 
       {/* Summary Table */}
 
-      <div className="bg-card/90 border border-border rounded-2xl overflow-hidden">
+      <div className="border border-slate-200 rounded-2xl overflow-hidden">
 
-        <div className="px-6 py-5 border-b border-border">
+        <div className="bg-[#0f172a] px-6 py-4">
 
-          <h3 className="font-bold text-xl">
+          <h3 className="font-bold text-xl text-white">
             الملخص
           </h3>
 
         </div>
 
-        <div className="overflow-x-auto">
+        <table className="w-full">
 
-          <table className="w-full">
+          <thead className="bg-[#0f172a] text-yellow-400">
 
-            <thead className="bg-muted/20">
+            <tr>
 
-              <tr className="text-sm text-muted-foreground">
+              <th className="p-4">السنة</th>
+              <th className="p-4">الإيرادات</th>
+              <th className="p-4">التكاليف</th>
+              <th className="p-4">صافي الدخل</th>
+              <th className="p-4">{governmentName}</th>
+              <th className="p-4">{partnerName}</th>
 
-                <th className="p-4">السنة</th>
-                <th className="p-4">الإيرادات</th>
-                <th className="p-4">التكاليف التشغيلية</th>
-                <th className="p-4">التكاليف الرأسمالية</th>
-                <th className="p-4">إجمالي التكاليف</th>
-                <th className="p-4">صافي الدخل</th>
-                <th className="p-4">{governmentName}</th>
-                <th className="p-4">{partnerName}</th>
+            </tr>
 
-              </tr>
+          </thead>
 
-            </thead>
+          <tbody>
 
-            <tbody>
+            {chartData.map(
+              (
+                row,
+                index
+              ) => (
 
-              {chartData.map(
-                (
-                  row,
-                  index
-                ) => (
+                <tr
+                  key={index}
+                  className="border-b border-slate-200"
+                >
 
-                  <tr
-                    key={index}
-                    className="border-t border-border text-sm"
-                  >
+                  <td className="p-4 text-center font-bold">
+                    {row.year}
+                  </td>
 
-                    <td className="p-4 text-center font-bold">
-                      {row.year}
-                    </td>
+                  <td className="p-4 text-center text-yellow-500 font-bold">
+                    {formatNumber(row.revenue)}
+                  </td>
 
-                    <td className="p-4 text-center text-yellow-400 font-bold">
-                      {formatNumber(row.revenue)}
-                    </td>
+                  <td className="p-4 text-center">
+                    {formatNumber(row.costs)}
+                  </td>
 
-                    <td className="p-4 text-center">
-                      {formatNumber(row.operational)}
-                    </td>
+                  <td className="p-4 text-center">
+                    {formatNumber(row.net)}
+                  </td>
 
-                    <td className="p-4 text-center">
-                      {formatNumber(row.capital)}
-                    </td>
+                  <td className="p-4 text-center text-yellow-600 font-bold">
+                    {formatNumber(row.government)}
+                  </td>
 
-                    <td className="p-4 text-center">
-                      {formatNumber(row.costs)}
-                    </td>
+                  <td className="p-4 text-center text-slate-600 font-bold">
+                    {formatNumber(row.partner)}
+                  </td>
 
-                    <td className="p-4 text-center">
-                      {formatNumber(row.net)}
-                    </td>
+                </tr>
+              )
+            )}
 
-                    <td className="p-4 text-center text-yellow-400 font-bold">
-                      {formatNumber(row.government)}
-                    </td>
+          </tbody>
 
-                    <td className="p-4 text-center text-slate-300 font-bold">
-                      {formatNumber(row.partner)}
-                    </td>
-
-                  </tr>
-                )
-              )}
-
-            </tbody>
-
-          </table>
-
-        </div>
+        </table>
 
       </div>
 
