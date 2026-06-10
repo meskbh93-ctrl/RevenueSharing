@@ -79,9 +79,13 @@ function StatCard({
           <h3 className="text-2xl font-bold">
             {value}
           </h3>
+
+          <p className="text-xs text-muted-foreground mt-1">
+            إجمالي 5 سنوات
+          </p>
         </div>
 
-        <div className="w-10 h-10 rounded-xl bg-black/20 flex items-center justify-center">
+        <div className="w-11 h-11 rounded-xl bg-black/20 flex items-center justify-center">
           {icon}
         </div>
 
@@ -235,11 +239,48 @@ export default function Dashboard() {
       0
     );
 
+  const governmentName =
+    project?.government_entity ||
+    (isAr
+      ? 'الجهة الحكومية'
+      : 'Government');
+
+  const partnerName =
+    project?.private_partner ||
+    (isAr
+      ? 'الشريك الخاص'
+      : 'Private Partner');
+
+  const operationalCosts =
+    costs
+      .filter(
+        (c) =>
+          c.type === 'operational' ||
+          c.type === 'تشغيلية'
+      )
+      .reduce(
+        (s, c) =>
+          s + (c.amount || 0),
+        0
+      );
+
+  const capitalCosts =
+    costs
+      .filter(
+        (c) =>
+          c.type === 'capital' ||
+          c.type === 'رأسمالية'
+      )
+      .reduce(
+        (s, c) =>
+          s + (c.amount || 0),
+        0
+      );
+
   const chartData =
     distribution.map(
       (d, i) => ({
-        year:
-          2027 + i,
+        year: 2027 + i,
 
         government:
           d.governmentAmount,
@@ -253,25 +294,28 @@ export default function Dashboard() {
         revenue:
           revenueData[i]
             ?.revenue || 0,
+
+        net:
+          (revenueData[i]
+            ?.revenue || 0) -
+          (costData[i]?.total || 0),
+
+        operational:
+          operationalCosts,
+
+        capital:
+          capitalCosts,
       })
     );
 
   const pieData = [
     {
-      name:
-        isAr
-          ? 'الحكومة'
-          : 'Government',
-
+      name: governmentName,
       value: totalGov,
     },
 
     {
-      name:
-        isAr
-          ? 'الشريك'
-          : 'Partner',
-
+      name: partnerName,
       value: totalPartner,
     },
   ];
@@ -365,9 +409,9 @@ export default function Dashboard() {
 
         <div>
 
-          <h2 className="text-3xl font-bold flex items-center gap-2">
+          <h2 className="text-4xl font-bold flex items-center gap-2">
 
-            <LayoutDashboard className="w-7 h-7" />
+            <LayoutDashboard className="w-8 h-8" />
 
             {isAr
               ? 'لوحة البيانات'
@@ -375,10 +419,10 @@ export default function Dashboard() {
 
           </h2>
 
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-2">
             {isAr
-              ? 'المؤشرات المالية وتحليل المشروع'
-              : 'Project financial analytics'}
+              ? 'المشاركة في الدخل — نظرة عامة وتحليلات'
+              : 'Revenue sharing analytics'}
           </p>
 
         </div>
@@ -401,7 +445,7 @@ export default function Dashboard() {
           <Printer className="w-4 h-4" />
 
           {isAr
-            ? 'طباعة PDF'
+            ? 'طباعة التقرير PDF'
             : 'Export PDF'}
 
         </Button>
@@ -410,100 +454,72 @@ export default function Dashboard() {
 
       {/* Stats */}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
         <StatCard
-          title={
-            isAr
-              ? 'الإيرادات'
-              : 'Revenue'
-          }
+          title="إجمالي الدخل"
           value={`${formatNumber(totalRev)} ريال`}
           icon={
-            <Coins className="w-5 h-5 text-yellow-400" />
+            <Coins className="w-5 h-5 text-yellow-300" />
           }
           color="bg-card/90 border-border"
         />
 
         <StatCard
-          title={
-            isAr
-              ? 'صافي الدخل'
-              : 'Net Income'
-          }
-          value={`${formatNumber(totalNet)} ريال`}
-          icon={
-            <Wallet className="w-5 h-5 text-green-400" />
-          }
-          color="bg-card/90 border-border"
-        />
-
-        <StatCard
-          title={
-            isAr
-              ? 'الحكومة'
-              : 'Government'
-          }
+          title={governmentName}
           value={`${formatNumber(totalGov)} ريال`}
           icon={
-            <Landmark className="w-5 h-5 text-yellow-400" />
+            <Landmark className="w-5 h-5 text-yellow-300" />
           }
           color="bg-card/90 border-border"
         />
 
         <StatCard
-          title={
-            isAr
-              ? 'الشريك'
-              : 'Partner'
-          }
+          title={partnerName}
           value={`${formatNumber(totalPartner)} ريال`}
           icon={
-            <Building2 className="w-5 h-5 text-slate-300" />
+            <Building2 className="w-5 h-5 text-yellow-300" />
           }
           color="bg-card/90 border-border"
         />
 
         <StatCard
-          title={
-            isAr
-              ? 'إجمالي التكاليف'
-              : 'Costs'
-          }
+          title="إجمالي التكاليف"
           value={`${formatNumber(totalCost)} ريال`}
+          icon={
+            <Wallet className="w-5 h-5 text-slate-300" />
+          }
+          color="bg-card/90 border-border"
+        />
+
+        <StatCard
+          title="التكاليف الرأسمالية"
+          value={`${formatNumber(capitalCosts)} ريال`}
+          icon={
+            <TrendingUp className="w-5 h-5 text-yellow-300" />
+          }
+          color="bg-yellow-500/10 border-yellow-500/30"
+        />
+
+        <StatCard
+          title="التكاليف التشغيلية"
+          value={`${formatNumber(operationalCosts)} ريال`}
           icon={
             <TrendingDown className="w-5 h-5 text-blue-400" />
           }
-          color="bg-blue-500/10 border-blue-500/20"
-        />
-
-        <StatCard
-          title={
-            isAr
-              ? 'التكاليف الرأسمالية'
-              : 'Capital'
-          }
-          value={`0 ريال`}
-          icon={
-            <TrendingUp className="w-5 h-5 text-yellow-400" />
-          }
-          color="bg-yellow-500/10 border-yellow-500/20"
+          color="bg-blue-500/10 border-blue-500/30"
         />
 
       </div>
 
       {/* Charts */}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        {/* Revenue */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         <div className="bg-card/90 border border-border rounded-2xl p-5">
 
-          <h3 className="font-bold mb-4">
-            {isAr
-              ? 'تحليل الإيرادات'
-              : 'Revenue Analysis'}
+          <h3 className="font-bold mb-5">
+            تحليل الإيرادات
           </h3>
 
           <ResponsiveContainer
@@ -511,9 +527,7 @@ export default function Dashboard() {
             height={280}
           >
 
-            <BarChart
-              data={chartData}
-            >
+            <BarChart data={chartData}>
 
               <CartesianGrid strokeDasharray="3 3" />
 
@@ -526,25 +540,15 @@ export default function Dashboard() {
               <Legend />
 
               <Bar
-                dataKey="government"
+                dataKey="revenue"
                 fill="#facc15"
-                radius={[
-                  5,
-                  5,
-                  0,
-                  0,
-                ]}
+                name="الإيرادات"
               />
 
               <Bar
-                dataKey="partner"
+                dataKey="net"
                 fill="#94a3b8"
-                radius={[
-                  5,
-                  5,
-                  0,
-                  0,
-                ]}
+                name="صافي الدخل"
               />
 
             </BarChart>
@@ -553,14 +557,10 @@ export default function Dashboard() {
 
         </div>
 
-        {/* Costs */}
-
         <div className="bg-card/90 border border-border rounded-2xl p-5">
 
-          <h3 className="font-bold mb-4">
-            {isAr
-              ? 'تحليل التكاليف'
-              : 'Costs Analysis'}
+          <h3 className="font-bold mb-5">
+            تحليل التكاليف
           </h3>
 
           <ResponsiveContainer
@@ -568,9 +568,7 @@ export default function Dashboard() {
             height={280}
           >
 
-            <BarChart
-              data={chartData}
-            >
+            <BarChart data={chartData}>
 
               <CartesianGrid strokeDasharray="3 3" />
 
@@ -580,15 +578,18 @@ export default function Dashboard() {
 
               <Tooltip />
 
+              <Legend />
+
               <Bar
-                dataKey="costs"
-                fill="#3b82f6"
-                radius={[
-                  5,
-                  5,
-                  0,
-                  0,
-                ]}
+                dataKey="operational"
+                fill="#facc15"
+                name="التكاليف التشغيلية"
+              />
+
+              <Bar
+                dataKey="capital"
+                fill="#94a3b8"
+                name="التكاليف الرأسمالية"
               />
 
             </BarChart>
@@ -597,19 +598,15 @@ export default function Dashboard() {
 
         </div>
 
-        {/* Pie */}
-
         <div className="bg-card/90 border border-border rounded-2xl p-5">
 
-          <h3 className="font-bold mb-4">
-            {isAr
-              ? 'توزيع الدخل النهائي'
-              : 'Income Split'}
+          <h3 className="font-bold mb-5">
+            توزيع الدخل الإجمالي
           </h3>
 
           <ResponsiveContainer
             width="100%"
-            height={280}
+            height={300}
           >
 
             <PieChart>
@@ -618,7 +615,7 @@ export default function Dashboard() {
                 data={pieData}
                 dataKey="value"
                 innerRadius={70}
-                outerRadius={100}
+                outerRadius={110}
               >
 
                 {pieData.map(
@@ -638,7 +635,6 @@ export default function Dashboard() {
               </Pie>
 
               <Tooltip />
-              <Legend />
 
             </PieChart>
 
@@ -646,24 +642,18 @@ export default function Dashboard() {
 
         </div>
 
-        {/* Revenue Distribution */}
-
         <div className="bg-card/90 border border-border rounded-2xl p-5">
 
-          <h3 className="font-bold mb-4">
-            {isAr
-              ? 'توزيع الدخل'
-              : 'Revenue Split'}
+          <h3 className="font-bold mb-5">
+            توزيع الدخل
           </h3>
 
           <ResponsiveContainer
             width="100%"
-            height={280}
+            height={300}
           >
 
-            <BarChart
-              data={chartData}
-            >
+            <BarChart data={chartData}>
 
               <CartesianGrid strokeDasharray="3 3" />
 
@@ -673,16 +663,20 @@ export default function Dashboard() {
 
               <Tooltip />
 
+              <Legend />
+
               <Bar
                 dataKey="government"
                 stackId="a"
                 fill="#facc15"
+                name={governmentName}
               />
 
               <Bar
                 dataKey="partner"
                 stackId="a"
                 fill="#94a3b8"
+                name={partnerName}
               />
 
             </BarChart>
@@ -693,16 +687,14 @@ export default function Dashboard() {
 
       </div>
 
-      {/* Table */}
+      {/* Summary Table */}
 
       <div className="bg-card/90 border border-border rounded-2xl overflow-hidden">
 
         <div className="px-6 py-5 border-b border-border">
 
-          <h3 className="font-bold text-lg">
-            {isAr
-              ? 'الملخص'
-              : 'Summary'}
+          <h3 className="font-bold text-xl">
+            الملخص
           </h3>
 
         </div>
@@ -715,41 +707,14 @@ export default function Dashboard() {
 
               <tr className="text-sm text-muted-foreground">
 
-                <th className="p-4">
-                  {isAr
-                    ? 'السنة'
-                    : 'Year'}
-                </th>
-
-                <th className="p-4">
-                  {isAr
-                    ? 'الإيرادات'
-                    : 'Revenue'}
-                </th>
-
-                <th className="p-4">
-                  {isAr
-                    ? 'التكاليف'
-                    : 'Costs'}
-                </th>
-
-                <th className="p-4">
-                  {isAr
-                    ? 'صافي الدخل'
-                    : 'Net'}
-                </th>
-
-                <th className="p-4">
-                  {isAr
-                    ? 'الحكومة'
-                    : 'Government'}
-                </th>
-
-                <th className="p-4">
-                  {isAr
-                    ? 'الشريك'
-                    : 'Partner'}
-                </th>
+                <th className="p-4">السنة</th>
+                <th className="p-4">الإيرادات</th>
+                <th className="p-4">التكاليف التشغيلية</th>
+                <th className="p-4">التكاليف الرأسمالية</th>
+                <th className="p-4">إجمالي التكاليف</th>
+                <th className="p-4">صافي الدخل</th>
+                <th className="p-4">{governmentName}</th>
+                <th className="p-4">{partnerName}</th>
 
               </tr>
 
@@ -768,39 +733,36 @@ export default function Dashboard() {
                     className="border-t border-border text-sm"
                   >
 
-                    <td className="p-4 text-center">
+                    <td className="p-4 text-center font-bold">
                       {row.year}
                     </td>
 
                     <td className="p-4 text-center text-yellow-400 font-bold">
-                      {formatNumber(
-                        row.revenue
-                      )}
-                    </td>
-
-                    <td className="p-4 text-center text-blue-400 font-bold">
-                      {formatNumber(
-                        row.costs
-                      )}
+                      {formatNumber(row.revenue)}
                     </td>
 
                     <td className="p-4 text-center">
-                      {formatNumber(
-                        row.revenue -
-                          row.costs
-                      )}
+                      {formatNumber(row.operational)}
                     </td>
 
                     <td className="p-4 text-center">
-                      {formatNumber(
-                        row.government
-                      )}
+                      {formatNumber(row.capital)}
                     </td>
 
                     <td className="p-4 text-center">
-                      {formatNumber(
-                        row.partner
-                      )}
+                      {formatNumber(row.costs)}
+                    </td>
+
+                    <td className="p-4 text-center">
+                      {formatNumber(row.net)}
+                    </td>
+
+                    <td className="p-4 text-center text-yellow-400 font-bold">
+                      {formatNumber(row.government)}
+                    </td>
+
+                    <td className="p-4 text-center text-slate-300 font-bold">
+                      {formatNumber(row.partner)}
                     </td>
 
                   </tr>
